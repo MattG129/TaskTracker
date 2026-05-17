@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title></title>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <meta name="description" content="" />
+        
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha384-1H217gwSVyLSIfaLxHbE7dRb3v4mYCKbpQvzx0cegeju1MVsGrX5xXxAvs/HgeFs" crossorigin="anonymous"></script>
+        <script src="BoilerPlate.js" type="text/javascript"></script>
+
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet" integrity="sha384-4LISF5TTJX/fLmGSxO53rV4miRxdg84mZsxmO8Rx5jGtp/LbrixFETvWa5a6sESd" crossorigin="anonymous">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js" integrity="sha384-DRe+1gYJauFEenXeWS8TmYdBmDUqnR5Rcw7ax4KTqOxXWd4NAMP2VPU5H69U7yP9" crossorigin="anonymous"></script>
+        <script src="Scripts/TaskCalcs.mjs" type="text/javascript"></script>
+        <script src="Scripts/Fields.js" type="text/javascript"></script>
+        <script src="Scripts/Parsley.js" type="text/javascript"></script>
+        <script src="Scripts/Modal.js" type="text/javascript"></script>
+        <script src="Scripts/ScoutPlanningTable.js" type="text/javascript"></script>
+        <script src="Scripts/MonthlyUpdater.js" type="text/javascript"></script>
+
+        <script src="https://parsleyjs.org/dist/parsley.js" integrity="sha384-0HmdHQBHe/sSM1qEobdZMf43ZJs6BLvTd73EqZSM6VrXo2ICjuQ5aYrka2MbVt9U" crossorigin="anonymous"></script>
+        <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js" integrity="sha384-RIQuldGV8mnjGdob13cay/K1AJa+LR7VKHqSXrrB5DPGryn4pMUXRLh92Ev8KlGF" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.14.0/jquery-ui.min.js" integrity="sha384-8EM386r8XMMzwGPUxfGNr6c1wIOYnPQBJ6VFxzKCZeklpQarHoZGB40kdNDA3gYr" crossorigin="anonymous"></script>
+        <link href="assets/js/jquery-ui.css" rel="stylesheet" type="text/css"/>
+        <script src="assets\js\jquery-ui-touch-punch\jquery.ui.touch-punch.js"></script> <!-- Helps the dragables work on mobile. -->
+        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" integrity="sha384-OXVF05DQEe311p6ohU11NwlnX08FzMCsyoXzGOaL+83dKAb3qS17yZJxESl8YrJQ" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js" integrity="sha384-d3UHjPdzJkZuk5H3qKYMLRyWLAQBJbby2yr2Q58hXXtAGF8RSNO9jpLDlKKPv5v3" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.js" integrity="sha256-yE5LLp5HSQ/z+hJeCqkz9hdjNkk1jaiGG0tDCraumnA=" crossorigin="anonymous"></script>
+
+        <script type="text/javascript">
+            let Page = 'index';
+            let NewScoutPlanRowID; // Initializing here so it can be used throughout the whole code and kept consistent.
+            let UpdateTableTimeout; // Prevents the import from triggering this function several times.
+            let UpdateModalTimeout;
+            let ImportInProgress = true;
+            let UnsavedChanges = false;
+            // Will be used to tell the modal if the selector is being opened up from the same row it was last opened for or not.
+            let PreviousModalCallingRowID = -1;
+            let CurrentModalCallingRowID = -1;
+        </script>
+    </head>
+    <body>
+        <style>
+            body, html {
+                margin-bottom: 2.5%;
+                margin-top: 2.5%;
+            }
+
+            body { 
+                color: black;
+                background-color: #9990a3;
+            }
+
+            #LoadingSpinner {
+                width: 50px;
+                height: 50px;
+                border: 3px solid rgba(255,255,255,.3);
+                border-radius: 50%;
+                border-top-color: #fff;
+                animation: spin 1s ease-in-out infinite;
+                -webkit-animation: spin 1s ease-in-out infinite;
+            }
+
+            @keyframes spin {
+                to { -webkit-transform: rotate(360deg); }
+            }
+            @-webkit-keyframes spin {
+                to { -webkit-transform: rotate(360deg); }
+            }
+
+            ul.parsley-errors-list {
+                list-style-type: none;
+                padding: 0;
+                margin: 0;
+                color: #800000;
+            }
+
+            i.bi-question-circle {
+                color: white;
+            }
+
+            .TableField {
+                border-color: black;
+                font-size: min(3vw, 16px);
+            }
+
+            /* td-label is used by table cells and labels when we want an entire table cell to act as a label for a checkbox it contains. */
+            td.td-label {
+                position: relative;
+            }
+
+            td.td-label:hover {
+                background-color: #E1EDF0;
+            }
+
+            label.td-label {
+                position: absolute;
+                top: 0%;
+                left: 0;
+                width: 100%;
+                height: 100%;
+            }
+
+            .swal-button {
+                background-color: #4962B3;
+            }
+
+            .swal-button:not([disabled]):hover {
+                background-color: #5B71BA;
+            }
+
+            .swal-button--cancel {
+                color: white;
+            }
+
+            .btn-add {
+                background: #52B4FA;
+            }
+
+            .btn-add:not([disabled]):hover {
+                background: #90D5FF;
+            }
+            
+            .InactiveScoutPlanRow {
+                color: gray;
+                border-color: gray;
+            }
+
+            .select2-container .select2-selection--multiple .select2-selection__choice {
+                max-width: 100%;
+                box-sizing: border-box;
+                white-space: normal;
+                word-wrap: break-word;
+            }
+
+            .select2-dropdown {
+                top: 2.5vw; /* Moves the select2 dropdown down since it would otherwise be too high up for some reason. */
+            }
+
+            .select2-search__field::placeholder {
+                text-align: center;
+            }
+
+            .TableValidation {
+                color: #800000;
+                display: none;
+            }
+
+            .select2-results__option {
+                font-size: min(3vw, 16px) /* Makes the select2 option text dynamic like the rest of the scout planning table text.*/
+            }
+
+            .SelectorField {
+                border-color: black;
+            }
+
+            .form-date { /* We want the form-control styling except for display:block which would cause the calendar button to appear on the next row. */
+                width: 100%;
+                padding: .375rem .75rem;
+                font-size: 1rem;
+                font-weight: 400;
+                line-height: 1.5;
+                color: var(--bs-body-color);
+                -webkit-appearance: none;
+                -moz-appearance: none;
+                appearance: none;
+                background-color: var(--bs-body-bg);
+                background-clip: padding-box;
+                border: var(--bs-border-width) solid var(--bs-border-color);
+                border-radius: 0.375rem 0 0 0.375rem;
+                transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+            }
+
+            .ui-datepicker-trigger {
+                padding: .375rem .75rem;
+                font-size: 1rem;
+                font-weight: 400;
+                line-height: 1.5;
+                color: var(--bs-body-color);
+                -webkit-appearance: none;
+                -moz-appearance: none;
+                appearance: none;
+                background-color: var(--bs-body-bg);
+                background-clip: padding-box;
+                border: var(--bs-border-width) solid var(--bs-border-color);
+                border-radius: 0 0.375rem 0.375rem 0;
+                transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+            }
+
+            #FullScreenButton {
+                color: black;
+                font-size: 18px;
+            }
+
+            #FullScreenButton:hover {
+                color: gray;
+            }
+
+            .ModalCellActive {
+                color: black;
+                background-color: #D8B668;
+            }
+
+            .ModalCellActive:hover {
+                color: black;
+                background-color: #BA8E23;
+            }
+
+            .ModalCellInactive {
+                color: gray;
+            }
+
+            .ModalCellInactive:hover {
+                color: gray;
+            }
+        </style>
+
+        <div id='Header'></div>
+
+        <form id="form" data-parsley-validate="true">
+            <div class="container">
+                <hr><center><h2>Calculator Settings</h2></center><br>
+
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="ImportExportAccordion">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#ImportExportAccordionContent" aria-expanded="false" aria-controls="ImportExportAccordionContent">
+                                <h4 class="d-block w-100 text-center">Import/Export</h4>
+                            </button>
+                        </h2>
+                        <div id="ImportExportAccordionContent" class="accordion-collapse collapse" aria-labelledby="ImportExportAccordion" data-bs-parent="#ImportExportAccordion">
+                            <div class="accordion-body">
+                                <label for="ImportState" class="form-label">
+                                    You can click the <b>Export</b> button below to copy all your scout planning info for future use. When you are ready to use the calculator again, you can paste that info into the text box below and click <b>Import</b> or <b>Import and Run</b>.
+                                </label><br>
+                                <center>
+                                    <textarea id="ImportState" class="form-control" style="border-color: black;" rows="5"></textarea><br>
+                                    <p id="InvalidImportMessage" style="color: red; display: none;">Invalid Import.</p>
+                                    <p id="LoadingImportMessage" style="display: none;">Loading...</p>
+                                    
+                                    <a class="btn btn-primary" style="border-color: black; margin-bottom: 3px;" onclick="Import(RunCalcs=false, ImportState=$('#ImportState').val(), Scroll=true);">
+                                        Import
+                                    </a>
+                                    <a class="btn btn-primary" style="border-color: black; margin-bottom: 3px;" onclick="Export();">
+                                        Export
+                                    </a>
+                                    <a class="btn btn-primary" style="border-color: black; margin-bottom: 3px;" onclick="Import(RunCalcs=true, ImportState=$('#ImportState').val(), Scroll=true);">
+                                        Import and Run
+                                    </a>
+                                    <br>
+                                </center>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br>
+
+                <center>
+                    <div class="form-check form-check-inline form-switch">
+                        <input type="checkbox" id="DisableUnsavedChangesWarning" class="form-check-input">
+                        <label for="DisableUnsavedChangesWarning" class="form-label">Disable unsaved changes warning</label>
+                    </div>
+
+                    <a id="CalculatorHeaderAnchor"></a>
+
+                    <hr><h2>Currency</h2><br>
+
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label for="FC" class="form-label">Free Carats</label>
+                            <input type="number" id="FC" class="form-control" style="max-width: 300px;" data-parsley-trigger="input" data-parsley-required="true" Value="0"><br>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label for="PC" class="form-label">Paid Carats</label>
+                            <input type="number" id="PC" class="form-control" style="max-width: 300px;" data-parsley-trigger="input" data-parsley-required="true" data-parsley-min="0" min="0" Value="0"><br>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label for="UmaTickets" class="form-label">Trainee Scout Tickets</label>
+                            <input type="number" id="UmaTickets" class="form-control" style="max-width: 300px;" data-parsley-trigger="input" data-parsley-required="true" data-parsley-min="0" min="0" Value="0"><br>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label for="CardTickets" class="form-label">Support Card Scout Tickets</label>
+                            <input type="number" id="CardTickets" class="form-control" style="max-width: 300px;" data-parsley-trigger="input" data-parsley-required="true" data-parsley-min="0" min="0" Value="0"><br>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-3"></div>
+                        <div class="col-md-3">
+                            <label for="RainbowCrystals" class="form-label">Rainbow Uncap Crystals</label>
+                            <input type="number" id="RainbowCrystals" class="form-control" style="max-width: 300px;" data-parsley-trigger="input" data-parsley-required="true" Value="0"><br>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label for="RainbowCrystalShards" class="form-label">Rainbow Crystal Shards</label>
+                            <input type="number" id="RainbowCrystalShards" class="form-control" style="max-width: 300px;" data-parsley-trigger="input" data-parsley-required="true" Value="0"><br>
+                        </div>
+                        <div class="col-md-3"></div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label for="FriendPoints" class="form-label">Friend Points</label>
+                            <a data-toggle="tooltip" title="The calculator will assume that Friend Points will be spent at the start of each month to purchase Uma/Card Scout Tickets. It also assumes that Friend Points will be spent on hint books as well. Uma Tickets will be prioritized over Card Tickets."><i class="bi bi-question-circle"></i></a>
+                            <input type="number" id="FriendPoints" class="form-control" style="max-width: 300px;" data-parsley-trigger="input" data-parsley-required="true" Value="0"><br>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label for="RainbowCleats" class="form-label">Rainbow Cleats</label>
+                            <a data-toggle="tooltip" title="The calculator will assume that cleats will be spent at the start of each month to purchase Uma/Card Scout Tickets. It also assumes that cleats will be spent on SR Tickets as well. Uma Tickets will be prioritized over Card Tickets."><i class="bi bi-question-circle"></i></a>
+                            <input type="number" id="RainbowCleats" class="form-control" style="max-width: 300px;" data-parsley-trigger="input" data-parsley-required="true" Value="0"><br>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label for="GoldCleats" class="form-label">Gold Cleats</label>
+                            <a data-toggle="tooltip" title="The calculator will assume that cleats will be spent at the start of each month to purchase Uma/Card Scout Tickets. It also assumes that cleats will be spent on SR Tickets as well. Uma Tickets will be prioritized over Card Tickets."><i class="bi bi-question-circle"></i></a>
+                            <input type="number" id="GoldCleats" class="form-control" style="max-width: 300px;" data-parsley-trigger="input" data-parsley-required="true" Value="0"><br>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label for="SilverCleats" class="form-label">Silver Cleats</label>
+                            <a data-toggle="tooltip" title="The calculator will assume that cleats will be spent at the start of each month to purchase Uma/Card Scout Tickets. It also assumes that cleats will be spent on SR Tickets as well. Uma Tickets will be prioritized over Card Tickets."><i class="bi bi-question-circle"></i></a>
+                            <input type="number" id="SilverCleats" class="form-control" style="max-width: 300px;" data-parsley-trigger="input" data-parsley-required="true" Value="0"><br>
+                        </div>
+                    </div>
+
+                    <hr><h2>PVP</h2><br>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <h3>Team Trials</h3>
+                            <label for="TeamTrialsClass" class="form-label">Team Trials Class</label>
+                            <input type="number" id="TeamTrialsClass" class="form-control" style="max-width: 300px; margin-bottom: 15px" data-parsley-trigger="input" data-parsley-required="true" data-parsley-range="[1,6]" min="1" max="6" Value="1">
+                        </div>
+
+                        <div class="col-md-6">
+                            <h3>
+                                Champions Meeting <a data-toggle="tooltip" title="The calculator will only factor in rewards from future CMs."><i class="bi bi-question-circle"></i></a>
+                             </h3>
+
+                            <label for="CMLeague" class="form-label">League</label>
+                            <select id="CMLeague" class="form-select" style="max-width: 300px; margin-bottom: 15px">
+                                <option value="1">Open</option>
+                                <option value="2">Graded</option>
+                            </select>
+
+                            <h4>Round 1</h4>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="CMR1Sets" class="form-label">Number of Sets</label>
+                                    <input type="number" id="CMR1Sets" class="form-control" style="max-width: 300px; margin-bottom: 15px" data-parsley-trigger="input" data-parsley-required="true" data-parsley-range="[0,8]" min="0" max="8" Value="0">
+                                </div>
+                                    
+                                <div class="col-md-6">
+                                    <label for="CMR1WR" class="form-label">Win Rate (%)</label>
+                                    <input type="number" id="CMR1WR" class="form-control" style="max-width: 300px; margin-bottom: 15px" data-parsley-trigger="input" data-parsley-required="true" data-parsley-range="[0,100]" min="0" max="100" Value="0">
+                                </div>
+                            </div>
+
+
+                            <h4>Round 2</h4>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <label for="CMR2Group" class="form-label">Group</label>
+                                    <select id="CMR2Group" class="form-select" style="max-width: 300px; margin-bottom: 15px">
+                                        <option value="1">A</option>
+                                        <option value="2">B</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label for="CMR2Sets" class="form-label">Number of Sets</label>
+                                    <input type="number" id="CMR2Sets" class="form-control" style="max-width: 300px; margin-bottom: 15px" data-parsley-trigger="input" data-parsley-required="true" data-parsley-range="[0,8]" min="0" max="8" Value="0">
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label for="CMR2WR" class="form-label">Win Rate (%)</label>
+                                    <input type="number" id="CMR2WR" class="form-control" style="max-width: 300px; margin-bottom: 15px" data-parsley-trigger="input" data-parsley-required="true" data-parsley-range="[0,100]" min="0" max="100" Value="0">
+                                </div>
+                            </div>
+
+                            <h4>Round 3</h4>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-check form-check-inline">
+                                        <input type="checkbox" id="CMR3Qualify" class="form-check-input">
+                                        <label for="CMR3Qualify" class="form-label">Qualify</label>
+                                    </div>
+                                </div>
+
+                                <script type="text/javascript">
+                                    $('#CMR3Qualify').change(function() {
+                                        if ($('#CMR3Qualify').is(':checked')) {
+                                            $('#CMR3Group, label[for="CMR3Group"], #CMR3Placement, label[for="CMR3Placement"]').show();
+                                        }
+                                        else {
+                                            $('#CMR3Group, label[for="CMR3Group"], #CMR3Placement, label[for="CMR3Placement"]').hide();
+                                        };
+                                    });
+                                </script>
+
+                                <div class="col-md-4">
+                                    <label for="CMR3Group" class="form-label" style="display: none;">Group</label>
+                                    <select id="CMR3Group" class="form-select" style="max-width: 300px; margin-bottom: 15px; display: none;">
+                                        <option value="1">A</option>
+                                        <option value="2">B</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label for="CMR3Placement" class="form-label" style="display: none;">Placement</label>
+                                    <input type="number" id="CMR3Placement" class="form-control" style="max-width: 300px; margin-bottom: 15px; display: none;" data-parsley-trigger="input" data-parsley-required="true" data-parsley-range="[1,3]" min="1" max="3" Value="3">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <h3>Club Rewards</h3>
+                            <label for="ExpectedClubRank" class="form-label">Expected Club Ranking</label>
+                            <a data-toggle="tooltip" title="The grade ranking ranges have not been pulled from any official sources, and as such may not be entirely accurate."><i class="bi bi-question-circle"></i></a>
+                            <select id="ExpectedClubRank" class="form-select" style="max-width: 300px; margin-bottom: 15px">
+                                <option value="1">SS (1-10)</option>
+                                <option value="2">S+ (11-30)</option>
+                                <option value="3">S &nbsp;&nbsp;(31-100)</option>
+                                <option value="4">A+ (101-500)</option>
+                                <option value="5">A &nbsp;&nbsp;(501-1000)</option>
+                                <option value="6">B+ (1001-3000)</option>
+                                <option value="7">B &nbsp;&nbsp;(3001-5000)</option>
+                                <option value="8">C+ (5001-7000)</option>
+                                <option value="9">C &nbsp;&nbsp;(7001-10000)</option>
+                                <option value="10">D+ (10001-30000)</option>
+                                <option value="11">D &nbsp;&nbsp;(> 30000)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <hr>
+                        <h2>
+                            Events <a data-toggle="tooltip" title="The calculator will only factor in rewards from future Events"><i class="bi bi-question-circle"></i></a>
+                        </h2>
+                        <br>
+
+                        <div class="row">
+                            <div class="col-md-2"></div>
+
+                            <div class="col-md-4">
+                                <div class="btn-group-vertical" style="max-width: 300px; margin-bottom: 15px">
+                                    Event Content Usually Completed:
+
+                                    <div class="form-check form-check-inline">
+                                        <input type="checkbox" id="CompletesEventStories" class="form-check-input">
+                                        <label for="CompletesEventStories" class="form-label">Stories</label>
+                                    </div>
+
+                                    <div class="form-check form-check-inline">
+                                        <input type="checkbox" id="CompletesEventBingoCards" class="form-check-input">
+                                        <label for="CompletesEventBingoCards" class="form-label">Bingo Cards</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="ExpectedEventPoints" class="form-label">Expected Event Points</label>
+                                <select id="ExpectedEventPoints" class="form-select" style="max-width: 300px; margin-bottom: 15px"></select>
+                                
+                                <script type="text/javascript">
+                                    $('#ExpectedEventPoints').append($('<option>', {
+                                        value: 0,
+                                        text: `0 - ${StoryEventRewards[0].Points-1}`,
+                                    }));
+
+                                    for (let i = 0; i < StoryEventRewards.length; i++) {
+                                        let Text;
+
+                                        if (i < StoryEventRewards.length - 1) {
+                                            Text = `${StoryEventRewards[i].Points.toLocaleString()} - ${(StoryEventRewards[i+1].Points-1).toLocaleString()}`;
+                                        }
+                                        else {
+                                            Text = `${StoryEventRewards[i].Points.toLocaleString()}+`
+                                        };
+                                        Text += ` (+${StoryEventRewards[i].Quantity} ${StoryEventRewards[i].RewardType.Label})`
+
+                                        $('#ExpectedEventPoints').append($('<option>', {
+                                            value: i+1,
+                                            text: Text,
+                                        }));
+                                    };
+                                </script>
+                            </div>
+
+                            <div class="col-md-2"></div>
+                        </div>
+
+                    </div>
+
+                    <div>
+                        <hr>
+                        <h2>
+                            Daily Carat Pack <a data-toggle="tooltip" title="This calculator will assume that the Daily Carat Pack will either be purchased continuously, from the next renewal date onward, or not at all."><i class="bi bi-question-circle"></i></a>
+                        </h2>
+                        <br>
+
+                        <div class="form-check form-check-inline">
+                            <input type="checkbox" id="HasDailyCaratPack" class="form-check-input">
+                            <label for="HasDailyCaratPack" class="form-label">Purchasing Daily Carat Pack</label>
+                        </div>
+                        <br>
+
+                        <div id="CaratPackRenewalDateSkipGroup" style="display: none;">
+                            <label for="NextCaratPackRenewalDate" class="form-label">Next Renewal Date</label><br>
+                            <input id="NextCaratPackRenewalDate" class="form-date" type="text" style="max-width: 200px;" data-parsley-required="true" data-parsley-mmddyyyy data-parsley-mintoday data-parsley-errors-container="#CaratPackRenewalDateSkipGroup">
+                        </div>
+
+                        <script type="text/javascript">
+                            $('#HasDailyCaratPack').change(function() {
+                                if ( $('#HasDailyCaratPack').is(':checked') ) {
+                                    $('#CaratPackRenewalDateSkipGroup').show();
+                                }
+                                else {
+                                    $('#CaratPackRenewalDateSkipGroup').hide();
+                                };
+                            });
+                        </script>
+                    </div>
+
+                    <hr>
+                    <h2>
+                        Custom Login Bonuses <a data-toggle="tooltip" title="The calculator is not preprogrammed for temporary login bonuses, so this section will allow you to add them in."><i class="bi bi-question-circle"></i></a>
+                    </h2>
+                    <br>
+
+                    <div style="overflow-x: auto;">
+                        <table id="BonusTable" class="table table-bordered table-striped" style="font-size: min(3vw, 16px); text-align: center; border: 1px;">
+                            <thead id="BonusTableHeader" style="display: none;">
+                                <tr>
+                                    <th style="width: 18%; min-width: 100px;"> Starts On              </th>
+                                    <th style="width: 18%; min-width: 120px;"> Reward Frequency       </th>
+                                    <th style="width: 18%; min-width: 100px;"> Reward Type            </th>
+                                    <th style="width: 18%; min-width: 100px;"> Rewards Per Login      </th>
+                                    <th style="width: 18%; min-width: 100px;"> Total Login Bonuses    </th>
+                                    <th style="width: 10%; min-width: 100px;"> <!-- Remove button --> </th>
+                                </tr>
+                            </thead>
+                            <tbody id="BonusTableBody">
+                                <!--- Rows will be added by the script below. --->
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="7">
+                                        <button id="AddBonusRowButton" type="button" style="width: 100%" class="btn btn-add" onclick="AddBonusRow();">
+                                            <b><i class="bi bi-plus-lg" style="font-size: 30px; font-weight: bold; color: white;"></i></b>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <script type="text/javascript">
+                        function AddBonusRow() {
+                            $('#BonusTableBody').append($(
+                                `<tr class="BonusTableRow">
+                                    <td>
+                                        <input class="BonusStartDate BonusTableField TableField form-control" type="text" data-parsley-required="true" data-parsley-mmddyyyy>
+                                    </td>
+                                    <td>
+                                        <select class="BonusFrequency BonusTableField TableField form-select">
+                                            <option value="1">Daily</option>
+                                            <option value="2">Weekly</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select class="BonusItemType BonusTableField TableField form-select">
+                                            <option value="1"> Carat                     </option>
+                                            <option value="2"> Trainee Scout Ticket      </option>
+                                            <option value="3"> Support Card Scout Ticket </option>
+                                            <option value="4"> Rainbow Uncap Crystal     </option>
+                                            <option value="5"> Rainbow Crystal Shard     </option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <input type="number" class="BonusItemQuantity BonusTableField TableField form-control" data-parsley-trigger="input" data-parsley-required="true" data-parsley-min="1" min="1" Value="1">
+                                    </td>
+                                    <td>
+                                        <input type="number" class="BonusLogins BonusTableField TableField form-control" data-parsley-trigger="input" data-parsley-required="true" data-parsley-min="1" min="1" Value="1">
+                                    </td>
+                                    <td>
+                                        <button type="button" class="btn btn-danger" onclick="$(this).closest('tr').remove(); CheckForUnsavedChanges(); ToggleBonusTableHeader();">
+                                            <i class="bi bi-x-lg" style="font-weight: bold;"></i>
+                                        </button>
+                                    </td>
+                                </tr>`
+                            ));
+
+                            SetParsleyValidations();
+                            UpdateUnsavedChangesListener();
+                            $('#BonusTableHeader').show()
+
+                            $(".BonusTableRow").last().find(".BonusStartDate").mask("00/00/0000", {placeholder: 'mm/dd/yyyy' }).datepicker({
+                                changeMonth: true,
+                                changeYear: true,
+                            }).on('change', function() {
+                                $(this).trigger('input');
+                                $(this).parsley().validate(); // For some reason parsley text won't show up without this.
+                            });
+                        };
+
+                        function ToggleBonusTableHeader() {
+                            if ($('.BonusTableRow').length > 0) {
+                                $('#BonusTableHeader').show()
+                            }
+                            else {
+                                $('#BonusTableHeader').hide()
+                            };
+                        };
+                    </script>
+
+                    <hr><h2>Scout Planning</h2><br>
+
+                    <button type="button" class="btn btn-primary" style="border-width: 1px; border-color: black;" onclick="
+                        swal({
+                            title: 'Are you sure?',
+                            text: 'Are you sure you want to automatically sort all table rows? Rows will be sorted first by start date, then by priority, and finally by banner type.',
+                            icon: 'warning',
+                            buttons: true,
+                            dangerMode: true
+                        }).then((Sort) => {
+                            if (Sort) {
+                                SortScoutPlanningTable()
+                                swal({icon: 'success', text: 'Rows sorted successfully.', timer: 2000});
+                            };
+                        });
+                    ">Sort Table</button>
+                    <br><br>
+
+                    <div class="modal fade" id="SelectionModal" tabindex="-1" aria-labelledby="SelectionModalLabel" aria-hidden="true">
+                        <div id="SelectionModalDialog" class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h1 class="modal-title fs-5" id="SelectionModalLabel">Scout Target Selector</h1>
+                                    &nbsp;&nbsp;
+                                    <i id="FullScreenButton" type="button" class="bi bi-arrows-fullscreen" onclick="
+                                        $('#SelectionModalDialog').toggleClass('modal-fullscreen');
+                                        $('#FullScreenButton').toggleClass('bi-arrows-fullscreen bi-fullscreen-exit');
+                                        UpdateModalSelection();
+                                    "></i>
+
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row">
+                                        <div class="col-lg-4">
+                                            <label for="ItemNameFilter" class="form-label">Name</label>
+                                            <input id="ItemNameFilter" class="form-control SelectorField" type="text" style="max-width: 300px;">
+                                        </div>
+
+                                        <div class="col-lg-4">
+                                            <label for="BannerTypeFilter" class="form-label">Banner Type</label>
+                                            <select id="BannerTypeFilter" class="form-select SelectorField" style="max-width: 300px;">
+                                                <option value="0" selected>Any</option>
+                                                <option value="1">Trainee</option>
+                                                <option value="2">Support Card</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-lg-4">
+                                            <label for="BannerIDFilter" class="form-label">Banner</label>
+                                            <button type="button" class=" btn btn-danger" onclick="$('#BannerIDFilter').val(0).trigger('input')"
+                                                style="color: white; font-size: 13px; padding-top: 2px; padding-left: 5px; padding-right: 5px; padding-bottom: 2px;"
+                                            >
+                                                <i class="bi bi-x-lg"></i>
+                                            </button>
+                                            <select id="BannerIDFilter" class="form-select SelectorField" style="max-width: 300px;">
+                                                <option value="0" selected>Any</option>
+                                                <!-- Other options will be filled in via Modal.js -->
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <hr>
+                                    <div id="ModalSelectionResults"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="ScoutPlanningTableAccordion">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#ScoutPlanningTableAccordionContent" aria-expanded="true" aria-controls="ScoutPlanningTableAccordionContent">
+                                    <h4 class="d-block w-100 text-center">Scout Planning Table</h4>
+                                </button>
+                            </h2>
+                            <div id="ScoutPlanningTableAccordionContent" class="accordion-collapse show" aria-labelledby="ScoutPlanningTableAccordion" data-bs-parent="#ScoutPlanningTableAccordion">
+                                <div class="accordion-body" style="overflow-x: auto; padding: 5px;">
+                                    <table id="ScoutPlanningTable" class="table table-bordered table-striped" style="font-size: min(3vw, 16px); text-align: center; border: 1px;">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 10%;">
+                                                    <!-- Vertical Grip -->
+                                                </th>
+                                                <th style="width: 20%; min-width: 80px;"> <!-- TODO: Make the accel rate dynamic. -->
+                                                    Banner <a data-toggle="tooltip" title="The calculator currently assumes that banners start/end at 12:00 AM (00:00). Dates are calculated based on the number of days between the Japanese server's launch and the banner's start date on that server. This number is then divided by the global acceleration rate (1.44) and is used to estimate the banner's global start date, based on the global server's launch date. The banner duration remains unchanged. For banners that have already been announced, the global dates will be entered manually."><i class="bi bi-question-circle" style="color: black;"></i></a>
+                                                </th>
+                                                <th style="width: 20%; min-width: 80px;">
+                                                    Copies <a data-toggle="tooltip" title="You can sort items by dragging and dropping them. Exchange points will be used on items in order from highest to lowest."><i class="bi bi-question-circle" style="color: black;"></i></a>
+                                                </th>
+                                                <th style="width: 40%; min-width: 80px;">
+                                                    Banner Config
+                                                </th>
+                                                <th style="width: 10%;">
+                                                    <!-- Remove Button -->
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="ScoutPlanningTableBody">
+                                            <tr id="ScoutPlanningLoadingMessage"><td colspan="5">Loading...</td></tr>
+
+                                            <!--- Rows will be added by the script below. --->
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <td colspan="7">
+                                                    <button id="AddRowButton" type="button" style="width: 100%" class="btn btn-add">
+                                                        <b><i class="bi bi-plus-lg" style="font-size: 30px; font-weight: bold; color: white;"></i></b>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <script type="text/javascript">
+                        function AddScoutPlanRow() {
+                            let NewRow = $(
+                                `<tr data-scoutplan-rowid="${NewScoutPlanRowID}">
+                                    <td class="handle" style="vertical-align: middle;"><i class="bi bi-arrows-move" style="font-size: 20px"></i></td>
+                                    <td>
+                                        <div class="ScoutPlanBanner" data-banner-id="0"></div>
+
+                                        <button type="button" class="ScoutPlanSelector btn btn-add" style="width: 90%" data-bs-toggle="modal" data-bs-target="#SelectionModal">
+                                            <i class="bi bi-plus-lg" style="font-size: 20px; color: white;"></i>
+                                        </button>
+
+                                        <div class="OutOfOrderMessage TableValidation">Banner start dates must be in chronological order.</div>
+                                        <div class="DuplicateBannerMessage TableValidation">Duplicate banner.</div>
+                                    </td>
+                                    <td class="ScoutPlanGoalsCell"></td>
+                                    <td>
+                                        <div class="row">
+                                            <div class="col-lg-4">
+                                                <label class="form-label">
+                                                    Exchange Pts
+                                                    <input type="number" class="ScoutPlanExchangePoints form-control" data-parsley-trigger="input" data-parsley-required="true" Value="0" min="0" data-parsley-min="0">
+                                                </label>
+                                            </div>
+
+                                            <div class="col-lg-4">
+                                                <label class="form-label">
+                                                    Scout Limit
+                                                    <input type="number" class="ScoutPlanLimit form-control" data-parsley-trigger="input" min="1" data-parsley-min="1">
+                                                </label>
+                                            </div>
+
+                                            <div class="col-lg-4">
+                                                <label class="form-label">
+                                                    Free Pulls
+                                                    <input type="number" class="ScoutPlanFreePulls form-control" data-parsley-trigger="input" data-parsley-required="true" Value="0" min="0" data-parsley-min="0">
+                                                </label>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row">
+                                            <div class="col-lg-4">
+                                                <label class="form-label">
+                                                    <input type="checkbox" class="ScoutPlanActive form-check-input" onchange="ToggleScoutPlanRow(this, ${NewScoutPlanRowID}); ValidateScoutPlanningTable();" checked>
+                                                    Active
+                                                </label>
+                                            </div>
+
+                                            <div class="col-lg-4">
+                                                <label class="form-label">
+                                                    <input type="checkbox" class="ScoutPlanPriorityBanner form-check-input">
+                                                    High Priority
+                                                </label>
+                                            </div>
+
+                                            <div class="col-lg-4">
+                                                <label class="form-label" style="display: none;">
+                                                    <input type="checkbox" class="ScoutPlanUseRainbowCrystals form-check-input"
+                                                        onchange="SkipTableElement(this, 'CardOwnedSkipGroup', ${NewScoutPlanRowID});"
+                                                    >
+                                                    Use Rainbow Uncap Crystals
+                                                </label>
+                                                <div id="CardOwnedSkipGroup${NewScoutPlanRowID}" style="display: none;">
+                                                    <label class="form-label">
+                                                        <input type="checkbox" class="ScoutPlanCardOwned1 form-check-input"> Card 1 Owned
+                                                    </label>
+                                                    <label class="form-label">
+                                                        <input type="checkbox" class="ScoutPlanCardOwned2 form-check-input"> Card 2 Owned
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <button type="button" class="btn btn-danger" onclick="$('tr[data-scoutplan-rowid=${NewScoutPlanRowID}]').remove(); ValidateScoutPlanningTable(); CheckForUnsavedChanges();">
+                                            <i class="bi bi-x-lg" style="font-weight: bold;"></i>
+                                        </button>
+                                    </td>
+                                </tr>`
+                            );
+
+                            $('#ScoutPlanningTableBody').append(NewRow);
+                            $('#ScoutPlanningTableBody').sortable("refresh");
+
+                            $(`tr[data-scoutplan-rowid=${NewScoutPlanRowID}] .ScoutPlanGoalsCell`).sortable();
+                            $(`tr[data-scoutplan-rowid=${NewScoutPlanRowID}] input, tr[data-scoutplan-rowid=${NewScoutPlanRowID}] select`).addClass('ScoutPlanField TableField');
+
+                            SetParsleyValidations();
+                            UpdateUnsavedChangesListener();
+                            NewScoutPlanRowID++;
+                        };
+
+                        let Select2Config = {
+                            closeOnSelect: false,
+                            placeholder: "Please Select",
+                            templateSelection: function (data) {
+                                return ItemsInfo[data.id].Name; // We won't need the date range once an item is selected since it will be displayed in the banner column.
+                            },
+                            matcher: function(params, data) {
+                                if (!data.disabled && ($.trim(params.term) == '' || data.text.toLowerCase().indexOf(params.term.toLowerCase()) > -1)) {
+                                    return data;
+                                }
+                                else {
+                                    return null;
+                                };
+                            }
+                        };
+
+                        $(function() {
+                            NewScoutPlanRowID = 0;
+
+                            $('#ScoutPlanningTableBody').sortable({
+                                handle: ".handle",
+                                update: function() {
+                                    ValidateScoutPlanningTable();
+                                    UnsavedChanges = true;
+                                }
+                            });
+
+                            $("#AddRowButton").click(function() {
+                                if ( $('tr[data-scoutplan-rowid]').length >= 100 ) {
+                                    swal({icon: 'error', text: 'Row limit reached.'});
+
+                                    return;
+                                };
+
+                                AddScoutPlanRow();
+                            });
+
+                            if (localStorage.getItem("UmaSessionState") == null) {
+                                // We want the table to load with 3 rows by default. We will also have these rows use the 3 closest banners and select up to 3 items from that banner.
+                                let Selected = [];
+                                let PreviousBannerID = 0;
+                                for (let i = 0; i < ItemsInfo.length; i++) {
+                                    if (ItemsInfo[i].GlobalEndDate >= Today && ItemsInfo[i].Disabled != true) {
+                                        if (ItemsInfo[i].BannerID != PreviousBannerID) {
+
+                                            if (NewScoutPlanRowID >= 3) {
+                                                break;
+                                            };
+
+                                            Selected = [];
+                                            PreviousBannerID = ItemsInfo[i].BannerID;
+                                            AddScoutPlanRow();
+                                        };
+
+                                        let TargetRow = $(`tr[data-scoutplan-rowid=${NewScoutPlanRowID-1}]`);
+
+                                        if (TargetRow.find('.ScoutPlanBanner').attr('data-banner-id') == 0) {
+                                            TargetRow.find('.ScoutPlanBanner').attr('data-banner-id', ItemsInfo[i].BannerID).html(BannersInfo[ItemsInfo[i].BannerID].Name);
+
+                                            if (ItemsInfo[i].Type == BannerTypes.Card.Value) {
+                                                TargetRow.find('.ScoutPlanUseRainbowCrystals').parent().show();
+                                            };
+                                        };
+
+                                        if (TargetRow.find('.ScoutPlanGoalsCell').find('label').length < 3) {
+                                            TargetRow.find('.ScoutPlanGoalsCell').append($(`
+                                                <label class="form-label" data-item-id=${i}>
+                                                    ${ItemsInfo[i].Name}
+                                                    <input type="number" class="ScoutPlanGoal ScoutPlanField TableField form-control" data-parsley-trigger="input" data-parsley-required="true" data-parsley-min="0" min="0" Value="1">
+                                                </label>
+                                            `));
+                                        };
+                                    };
+                                };
+                            };
+                        });
+
+                        function ValidateScoutPlanningTable() {
+                            clearTimeout(UpdateTableTimeout);
+
+                            UpdateTableTimeout = setTimeout(function() {
+                                $('.TableValidation').hide();
+
+                                let Banners = [];
+                                let PreviousRowBannerID = -1;
+                                $('tr[data-scoutplan-rowid]').each(function() {
+                                    let BannerID = $(this).find('.ScoutPlanBanner').attr('data-banner-id');
+
+                                    if ($(this).find('.ScoutPlanActive').is(':checked')) {
+                                        if (BannerID != 0) {
+                                            if (PreviousRowBannerID != -1 && BannersInfo[BannerID].StartDate < BannersInfo[PreviousRowBannerID].StartDate) {
+                                                $(this).find('.OutOfOrderMessage').show();
+                                            };
+
+                                            if (!Banners.includes(BannerID)) {
+                                                Banners.push(BannerID);
+                                            }
+                                            else {
+                                                $(this).find('.DuplicateBannerMessage').show();
+                                            };
+
+                                            PreviousRowBannerID = BannerID;
+                                        };
+                                    };
+                                });
+
+                                if (
+                                    $('tr[data-scoutplan-rowid]:not(.InactiveScoutPlanRow)').length > 0
+                                    && $('tr[data-scoutplan-rowid]').find('.TableValidation:visible').length == 0
+                                ) {
+                                    $("#Calculate").removeClass('disabled');
+                                }
+                                else {
+                                    $("#Calculate").addClass('disabled');
+                                };
+
+                                /* ValidateScoutPlanningTable will hide the loading message since updating the table after the import can take a non-negligible amount of time, during which we would want the loading message to still be present. */
+                                $('#ScoutPlanningLoadingMessage').hide();
+                            }, 10)
+                        };
+
+                        function UpdateScoutPlanningTableSelection(BannerID, ItemID, CurrentModalCallingRowID) {
+                            let CallingRow = $(`tr[data-scoutplan-rowid="${CurrentModalCallingRowID}"]`);
+                            let TargetRow = CallingRow;
+
+                            if ( $(`.ScoutPlanBanner[data-banner-id="${BannerID}"]`).length == 0 ) {
+                                if ( CallingRow.find('.ScoutPlanBanner').attr('data-banner-id') == 0 ) {
+                                    PreviousModalCallingRowID = -1; // If a row's banner id is updated, then clicking on it again should have the modal focus on that banner id.
+                                }
+                                else {
+                                    AddScoutPlanRow();
+                                    TargetRow = $(`tr[data-scoutplan-rowid=${NewScoutPlanRowID-1}]`)
+                                };
+
+                                TargetRow.find('.ScoutPlanBanner').attr('data-banner-id', BannerID).html(BannersInfo[BannerID].Name);
+
+                                if (ItemsInfo[ItemID].Type == BannerTypes.Card.Value) {
+                                    TargetRow.find('.ScoutPlanUseRainbowCrystals').parent().show();
+                                };
+                            }
+                            else if (TargetRow.find('.ScoutPlanBanner').attr('data-banner-id') != BannerID) {
+                                TargetRowID = $(`div[data-banner-id="${BannerID}"]`).parent().parent().attr('data-scoutplan-rowid')
+                                TargetRow = $(`tr[data-scoutplan-rowid=${TargetRowID}]`);
+                            };
+
+                            if (TargetRow.find(`label[data-item-id="${ItemID}"]`).length == 1) {
+                                TargetRow.find(`label[data-item-id="${ItemID}"]`).remove();
+                            }
+                            else {
+                                TargetRow.find('.ScoutPlanGoalsCell').append($(`
+                                    <label class="form-label" data-item-id=${ItemID}>
+                                        ${ItemsInfo[ItemID].Name}
+                                        <input type="number" class="ScoutPlanGoal ScoutPlanField TableField form-control" data-parsley-trigger="input" data-parsley-required="true" data-parsley-min="0" min="0" Value="1">
+                                    </label>
+                                `));
+                            };
+
+                            ValidateScoutPlanningTable();
+                            UnsavedChanges = true;
+                        };
+                    </script>
+
+                    <hr><h2>Scout Results</h2><br>
+
+                    <a id="Calculate" class="btn btn-primary" style="border-width: 1px; border-color: black;">Calculate</a>
+                </center>
+            </div>
+            <br>
+        </form>
+
+        <div class="container">
+            <center>
+                <div id="LoadingGroup" style="display: none;">
+                    <div id="LoadingSpinner"></div>
+                    <br>
+                    Loading...
+                </div>
+
+                <a id="ScoutResultsAnchor"></a>
+
+                <table id="ScoutResultsTable" class="table table-bordered table-striped" style="width: 100%; font-size: min(3vw, 16px); text-align: center; border: 1px; display: none;">
+                    <thead>
+                        <tr>
+                            <th style="width: 30%">Banner</th>
+                            <th style="width: 15%">
+                                Max Scouts <a data-toggle="tooltip" title="An estimate of how many scouts you can make on the banner. This is assuming all prior items are acquired with as few scouts as possible."><i class="bi bi-question-circle" style="color: black;"></i></a>
+                            </th>
+                            <th style="width: 30%">Scout Item(s)</th>
+                            <th style="width: 10%">Copies</th>
+                            <th style="width: 15%">Chance of Success</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ScoutPlanningResultsBody"> <!--- Will be filled in by ScoutPlanningCalculator. ---> </tbody>
+                    <tfoot> <!--- Will be filled in by ScoutPlanningCalculator. ---> </tfoot>
+                </table>
+
+                <hr>
+                <div id="Footer"></div>
+            </center>
+        </div>
+
+        <script type="text/javascript">
+
+            function getInvalidFields() {
+                let InvalidFields = [];
+                
+                $('input:not([type="checkbox"])').each(function() {
+                    if (!$(this).parsley().isValid() && $(this).is(":visible")) {
+                        InvalidFields.push($(this).attr('id'));
+                    };
+                });
+
+                return InvalidFields;
+            };
+
+            $("#Calculate").on('click', function() {
+                $('#ScoutResultsTable').hide();
+
+                let InvalidFields = getInvalidFields();
+                if (InvalidFields.length > 0) {
+                    swal({icon: 'error', text: 'Please correct invalid data before running calculations.'});
+
+                    if (InvalidFields[0] != null) { // Prevents scrolling for scout plan fields since they don't have IDs.
+                        $('html, body').animate({scrollTop: $(`#${InvalidFields[0]}`).offset().top-100, easing: 'linear'}, 250);
+                    };
+                }
+                else {
+                    $("#Calculate").hide();
+
+                    $('#LoadingGroup').show();
+
+                    $('html, body').animate({scrollTop: $("#LoadingGroup").offset().top, easing: 'linear'}, 100);
+
+                    setTimeout(function () {
+                        let ScoutConfig = CompileForm();
+                        ScoutPlanningCalculator(ScoutConfig);
+
+                        $("#Calculate").html('Recalculate');
+
+                        $('#LoadingGroup').hide();
+
+                        $('html, body').animate({scrollTop: $("#ScoutResultsAnchor").offset().top, easing: 'linear'}, 250);
+                        
+                        $("#Calculate").show();
+                    }, 500);
+                };
+            });
+
+            function ToggleScoutPlanRow(caller, ScoutPlanRowID) {
+                if ($(caller).is(':checked')) {
+                    $(`tr[data-scoutplan-rowid=${ScoutPlanRowID}] button.ScoutPlanSelector`).show();
+                    $(`tr[data-scoutplan-rowid=${ScoutPlanRowID}] .ScoutPlanBanner`).css('color', 'black');
+                }
+                else {
+                    $(`tr[data-scoutplan-rowid=${ScoutPlanRowID}] button.ScoutPlanSelector`).hide();
+                    $(`tr[data-scoutplan-rowid=${ScoutPlanRowID}] .ScoutPlanBanner`).css('color', 'gray');
+                };
+            };
+
+            function CompileForm(){
+                let FormValues = {};
+
+                $('#form input:not(.ScoutPlanField, .BonusTableField, .SelectorField), #form select:not(.ScoutPlanField, .BonusTableField, .SelectorField)').each(function() {
+                    if ($(this).is(':checkbox')) {
+                        FormValues[this.id] = $(this).is(':checked');
+                    }
+                    else if ($(this).attr('type') == 'text') {
+                        FormValues[this.id] = this.value;
+                    }
+                    else {
+                        FormValues[this.id] = this.value == '' ? '' : Number(this.value);
+                    };
+                });
+
+                FormValues.ValidationErrors = getInvalidFields().length + $('tr[data-scoutplan-rowid]').find('.TableValidation:visible').length;
+
+                FormValues.LoginBonusArray = [];
+                $('tr.BonusTableRow').each(function() {
+                    FormValues.LoginBonusArray.push({
+                        StartDate:           $(this).find('td .BonusStartDate').val(),
+                        Frequency:           $(this).find('td .BonusFrequency').val(),
+                        ItemType:     Number($(this).find('td .BonusItemType').val()),
+                        ItemQuantity:        $(this).find('td .BonusItemQuantity').val(),
+                        Logins:              $(this).find('td .BonusLogins').val()
+                    });
+                });
+
+                FormValues.ScoutPlanArray = [];
+                $('tr[data-scoutplan-rowid]').each(function() {
+                    let Items = [];
+                    let Goals = {};
+                    $(this).find('label[data-item-id]').each(function() {
+                        Items.push($(this).attr('data-item-id'));
+                        Goals[$(this).attr('data-item-id')] = $(this).find('.ScoutPlanGoal').val();
+                    });
+
+                    if (Items.length > 0) {
+                        FormValues.ScoutPlanArray.push({
+                            Items: Items,
+                            Goals: Goals,
+                            ExchangePoints: Number($(this).find('td .ScoutPlanExchangePoints').val()),
+                            Active: $(this).find('td .ScoutPlanActive').is(':checked'),
+                            PriorityBanner: $(this).find('td .ScoutPlanPriorityBanner').is(':checked'),
+                            UseRainbowCrystals: $(this).find('td .ScoutPlanUseRainbowCrystals').is(':checked'),
+                            CardOwned1: $(this).find('td .ScoutPlanCardOwned1').is(':checked'),
+                            CardOwned2: $(this).find('td .ScoutPlanCardOwned2').is(':checked'),
+                            Limit: $(this).find('td .ScoutPlanLimit').val(),
+                            FreePulls: $(this).find('td .ScoutPlanFreePulls').val()
+                        });
+                    };
+                });
+
+                return FormValues
+            };
+
+            function Import(RunCalcs, ImportState, Scroll) {
+                ImportInProgress = true;
+                let ValidImport = true;
+                let JSONImport;
+
+                try {
+                    JSONImport = JSON.parse(ImportState);
+
+                    // Since some of the import code explicitly references the scout plan array it needs to be defined.
+                    if (JSONImport.ScoutPlanArray == undefined) {
+                        ValidImport = false;
+                    };
+                } catch (error) {
+                    ValidImport = false;
+                };
+
+                if (!ValidImport) {
+                    $('#InvalidImportMessage').show();
+                    ImportInProgress = false;
+                }
+                else if (RunCalcs && JSONImport.ValidationErrors > 0) {
+                    swal({icon: 'error', text: 'Validation issues were detected in the import. The import will proceed, but calculations will not be performed.'}).then(function() {
+                        Import(RunCalcs=false, ImportState=ImportState, Scroll=true);
+                    });
+                }
+                else {
+                    $('#InvalidImportMessage').hide();
+                    $('#LoadingImportMessage').show();
+                    $('#ScoutPlanningLoadingMessage').show();
+
+                    $('tr.BonusTableRow').remove();
+                    for (let i = 0; i < JSONImport.LoginBonusArray.length; i++) {
+                        AddBonusRow();
+
+                        for (let Key in JSONImport.LoginBonusArray[i]) {
+                            if ($(`.BonusTableRow .Bonus${Key}`)[i] != undefined) {
+                                $(`.BonusTableRow .Bonus${Key}`)[i].value = JSONImport.LoginBonusArray[i][Key];
+                            };
+                        };
+                    };
+
+                    setTimeout(function() {
+                        $('#form input:not(.ScoutPlanField, .BonusTableField), #form select:not(.ScoutPlanField, .BonusTableField)').each(function() {
+                            if ($(this).is(':checkbox')) {
+                                $(this).prop('checked', JSONImport[this.id]);
+                            }
+                            else {
+                                // The renewal date field used to use a different date format so this will account for that when loading older imports.
+                                if ($(this).hasClass('form-date') && !moment(JSONImport[this.id], "MM/DD/YYYY").isValid() && moment(JSONImport[this.id]).isValid()) {
+                                    JSONImport[this.id] = moment(JSONImport[this.id]).format('L');
+                                };
+
+                                $(this).val(JSONImport[this.id]);
+                            };
+                        });
+
+                        // We will remove the existing scout planning rows to avoid any potential conflicts with the imported ones.
+                        $('tr[data-scoutplan-rowid]').remove();
+                        NewScoutPlanRowID = 0; // We will set this to zero so that each row's id will line up with the scout plan item's index.
+
+                        let ExpiredActiveItems = [];
+                        for (let i = 0; i < JSONImport.ScoutPlanArray.length; i++) {
+                            let ScoutPlanBanner = JSONImport.ScoutPlanArray[i];
+                            let FirstItem = ScoutPlanBanner.Items[0];
+
+                            // TODO: Review if this is really necessary.
+                            if (FirstItem <= 0 || FirstItem >= ItemsInfo.length) {
+                                NewScoutPlanRowID++; // We want to keep this synced with i.
+                            }
+                            else if (ItemsInfo[FirstItem].GlobalEndDate < Today) {
+                                NewScoutPlanRowID++;
+
+                                if (ScoutPlanBanner.Active) {
+                                    for (let j = 0; j < ScoutPlanBanner.Items.length; j++) {
+                                        ExpiredActiveItems.push(ScoutPlanBanner.Items[j]) ;
+                                    };
+                                };
+                            }
+                            else {
+                                AddScoutPlanRow();
+
+                                let BannerID = ItemsInfo[FirstItem].BannerID;
+                                let TargetRow = $(`tr[data-scoutplan-rowid=${NewScoutPlanRowID-1}]`);
+                                TargetRow.find('.ScoutPlanBanner').attr('data-banner-id', BannerID);
+                                TargetRow.find('.ScoutPlanBanner').html( BannersInfo[ BannerID ].Name );
+
+                                if (BannersInfo[BannerID].Type == BannerTypes.Card.Value) {
+                                    TargetRow.find('.ScoutPlanUseRainbowCrystals').parent().show();
+                                };
+
+                                // TODO: Really need to write some of this dynamically.
+                                $(`tr[data-scoutplan-rowid=${i}] td .ScoutPlanExchangePoints`).val(ScoutPlanBanner.ExchangePoints);
+                                $(`tr[data-scoutplan-rowid=${i}] td .ScoutPlanLimit`).val(ScoutPlanBanner.Limit);
+                                $(`tr[data-scoutplan-rowid=${i}] td .ScoutPlanFreePulls`).val(ScoutPlanBanner.FreePulls);
+                                $(`tr[data-scoutplan-rowid=${i}] td .ScoutPlanActive`).prop('checked', ScoutPlanBanner.Active);
+                                $(`tr[data-scoutplan-rowid=${i}] td .ScoutPlanPriorityBanner`).prop('checked', ScoutPlanBanner.PriorityBanner);
+                                $(`tr[data-scoutplan-rowid=${i}] td .ScoutPlanUseRainbowCrystals`).prop('checked', ScoutPlanBanner.UseRainbowCrystals);
+                                $(`tr[data-scoutplan-rowid=${i}] td .ScoutPlanCardOwned1`).prop('checked', ScoutPlanBanner.CardOwned1);
+                                $(`tr[data-scoutplan-rowid=${i}] td .ScoutPlanCardOwned2`).prop('checked', ScoutPlanBanner.CardOwned2);
+
+                                let GoalsCell = $(`tr[data-scoutplan-rowid=${i}]`).find('.ScoutPlanGoalsCell');
+                                for (let j = 0; j < ScoutPlanBanner.Items.length; j++) {
+                                    let ItemID = ScoutPlanBanner.Items[j];
+
+                                    GoalsCell.append($(`
+                                        <label class="form-label" data-item-id=${ItemID}>
+                                            ${ItemsInfo[ItemID].Name}
+                                            <input type="number" class="ScoutPlanGoal ScoutPlanField TableField form-control" data-parsley-trigger="input" data-parsley-required="true" data-parsley-min="0" min="0" Value="${ScoutPlanBanner.Goals[ItemID]}">
+                                        </label>
+                                    `));
+                                };
+                            };
+                        };
+
+                        if (JSONImport.ScoutPlanArray.length == 0) {
+                            $('#ScoutPlanningLoadingMessage').hide();
+                        };
+
+                        if (ExpiredActiveItems.length > 0) {
+                            let RemovedRows = `Expired wish plan row(s) were detected in the import. The following row(s) have been automatically removed:
+                            `
+                            for (let i = 0; i < ExpiredActiveItems.length; i++) {
+                                RemovedRows += `
+                                    \u2022 ${ItemsInfo[ExpiredActiveItems[i]].Name}`
+                            };
+                            RemovedRows += `
+
+                            All other information has been successfully imported.`
+
+                            swal({icon: 'info', text: RemovedRows});
+                        };
+
+                        // TODO: This really needs to be removed.
+                        $('input:not(.ui-datepicker-month, .ui-datepicker-year), select:not(.ui-datepicker-month, .ui-datepicker-year)').change().trigger('input');
+
+                        if (RunCalcs == true) {
+                            $('#Calculate').trigger('click');
+                        }
+                        else if (Scroll == true) {
+                            /* We will prevent ValidateScoutPlanningTable from running till the scroll is complete.
+                            As otherwise it would delay the scrolling animation. */
+                            // TODO: The above comment will need to be revisted as this was made prior to the select2 dropdowns being replaced with modal selection.
+                            clearTimeout(UpdateTableTimeout);
+
+                            $('html, body').animate({
+                                scrollTop: $("#CalculatorHeaderAnchor").offset().top,
+                                easing: 'linear'
+                            }, 500, function() {ValidateScoutPlanningTable()});
+                        };
+
+                        $('#LoadingImportMessage').hide();
+                        ImportInProgress = false;
+                    }, 100);
+                };
+            };
+
+            function Export() {
+                let ExportState = JSON.stringify(CompileForm());
+                var temp = $("<input>");
+                $("body").append(temp);
+                temp.val(ExportState).select();
+                document.execCommand("copy");
+                temp.remove();
+
+                swal({icon: 'success', text: 'Export copied to clipboard.', timer: 2000});
+            };
+
+            $(function () {
+                $('a[data-toggle="tooltip"]').each(function() {
+                    $(this).tooltip({
+                        html: true
+                    });
+                });
+            });
+
+            function SetParsleyValidations() {
+                $('input:not([type="checkbox"])').on('input', function(){
+                    if (!$(this).parsley().isValid()) {
+                        $(this).css('background-color', '#E55451');
+                    }
+                    else{
+                        $(this).css('background-color', 'white');
+                    };
+                });
+
+                $('input:not([type="checkbox"])').each(function() {
+                    $(this).parsley().validate();
+                });
+            };
+
+            function UpdateUnsavedChangesListener() {
+                $("input, select").on('input', function() {
+                    CheckForUnsavedChanges();
+                });
+            };
+
+            function CheckForUnsavedChanges() {
+                if (!ImportInProgress) {
+                    UnsavedChanges = true;
+                };
+            };
+
+            $(function() {
+                // For some reason this is the only way I've been able to get the select2 to automatically resize on window resizing.
+                let ResizeTimeout;
+                $(window).on('resize', function() {
+                    UpdateModalSelection();
+                });
+
+                SetParsleyValidations();
+
+                $('input, select').change().trigger('input');
+
+                /* This is called in the add row function and since that will probably 
+                always be run this probably isn't needed but better safe than sorry. */
+                UpdateUnsavedChangesListener();
+
+                /* When leaving the page, we will save the users form inputs to local storage so that we can import them again after the page
+                has been refreshed. This is needed to reconstruct the scout planning table. We are calling this variable UmaSessionState
+                instead of just SessionState as that var name is used by the Genshin calculator and we don't want any storage conflicts. */
+                $(document).on('visibilitychange', function() {
+                    if (UnsavedChanges) {
+                        localStorage.setItem("UmaSessionState", JSON.stringify(CompileForm()));
+                    };
+                });
+
+                let UmaSessionState = localStorage.getItem("UmaSessionState");
+
+                if (UmaSessionState != null) {
+                    // TODO: Add a toggle to turn this off.
+                    Import(RunCalcs=false, ImportState=UmaSessionState, Scroll=false);
+                }
+                else {
+                    ImportInProgress = false;
+                };
+
+                window.onbeforeunload = function() {
+                    if (UnsavedChanges && !$('#DisableUnsavedChangesWarning').is(':checked')) {
+                        return "You have unsaved changes on this page. If you wish to save your changes, then please export them before leaving this page.";
+                    };
+                };
+            });
+        </script>
+    </body>
+</html>
