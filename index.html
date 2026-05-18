@@ -16,11 +16,14 @@
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js" integrity="sha384-DRe+1gYJauFEenXeWS8TmYdBmDUqnR5Rcw7ax4KTqOxXWd4NAMP2VPU5H69U7yP9" crossorigin="anonymous"></script>
+        <script src="Scripts/TasksTables.js" type="text/javascript"></script>
+        <!-- <script type="text/javascript"></script> -->
+
+
         <script src="Scripts/TaskCalcs.mjs" type="text/javascript"></script>
         <script src="Scripts/Fields.js" type="text/javascript"></script>
         <script src="Scripts/Parsley.js" type="text/javascript"></script>
         <script src="Scripts/Modal.js" type="text/javascript"></script>
-        <script src="Scripts/ScoutPlanningTable.js" type="text/javascript"></script>
         <script src="Scripts/MonthlyUpdater.js" type="text/javascript"></script>
 
         <script src="https://parsleyjs.org/dist/parsley.js" integrity="sha384-0HmdHQBHe/sSM1qEobdZMf43ZJs6BLvTd73EqZSM6VrXo2ICjuQ5aYrka2MbVt9U" crossorigin="anonymous"></script>
@@ -265,241 +268,17 @@
                         <input type="checkbox" id="DisableUnsavedChangesWarning" class="form-check-input">
                         <label for="DisableUnsavedChangesWarning" class="form-label">Disable unsaved changes warning</label>
                     </div>
+                    <br>
+
+                    <div id="TasksAccordionSettings" class="btn-group-horizontal" style="/*max-width: 300px;*/ margin-bottom: 15px">
+                        Open on page load:
+
+                        
+
+                        
+                    </div>
 
                     <a id="CalculatorHeaderAnchor"></a>
-
-                    <hr><h2>Currency</h2><br>
-
-                    <div class="row">
-                        <div class="col-md-3">
-                            <label for="FC" class="form-label">Free Carats</label>
-                            <input type="number" id="FC" class="form-control" style="max-width: 300px;" data-parsley-trigger="input" data-parsley-required="true" Value="0"><br>
-                        </div>
-
-                        <div class="col-md-3">
-                            <label for="PC" class="form-label">Paid Carats</label>
-                            <input type="number" id="PC" class="form-control" style="max-width: 300px;" data-parsley-trigger="input" data-parsley-required="true" data-parsley-min="0" min="0" Value="0"><br>
-                        </div>
-
-                        <div class="col-md-3">
-                            <label for="UmaTickets" class="form-label">Trainee Scout Tickets</label>
-                            <input type="number" id="UmaTickets" class="form-control" style="max-width: 300px;" data-parsley-trigger="input" data-parsley-required="true" data-parsley-min="0" min="0" Value="0"><br>
-                        </div>
-
-                        <div class="col-md-3">
-                            <label for="CardTickets" class="form-label">Support Card Scout Tickets</label>
-                            <input type="number" id="CardTickets" class="form-control" style="max-width: 300px;" data-parsley-trigger="input" data-parsley-required="true" data-parsley-min="0" min="0" Value="0"><br>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-3"></div>
-                        <div class="col-md-3">
-                            <label for="RainbowCrystals" class="form-label">Rainbow Uncap Crystals</label>
-                            <input type="number" id="RainbowCrystals" class="form-control" style="max-width: 300px;" data-parsley-trigger="input" data-parsley-required="true" Value="0"><br>
-                        </div>
-
-                        <div class="col-md-3">
-                            <label for="RainbowCrystalShards" class="form-label">Rainbow Crystal Shards</label>
-                            <input type="number" id="RainbowCrystalShards" class="form-control" style="max-width: 300px;" data-parsley-trigger="input" data-parsley-required="true" Value="0"><br>
-                        </div>
-                        <div class="col-md-3"></div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-3">
-                            <label for="FriendPoints" class="form-label">Friend Points</label>
-                            <a data-toggle="tooltip" title="The calculator will assume that Friend Points will be spent at the start of each month to purchase Uma/Card Scout Tickets. It also assumes that Friend Points will be spent on hint books as well. Uma Tickets will be prioritized over Card Tickets."><i class="bi bi-question-circle"></i></a>
-                            <input type="number" id="FriendPoints" class="form-control" style="max-width: 300px;" data-parsley-trigger="input" data-parsley-required="true" Value="0"><br>
-                        </div>
-
-                        <div class="col-md-3">
-                            <label for="RainbowCleats" class="form-label">Rainbow Cleats</label>
-                            <a data-toggle="tooltip" title="The calculator will assume that cleats will be spent at the start of each month to purchase Uma/Card Scout Tickets. It also assumes that cleats will be spent on SR Tickets as well. Uma Tickets will be prioritized over Card Tickets."><i class="bi bi-question-circle"></i></a>
-                            <input type="number" id="RainbowCleats" class="form-control" style="max-width: 300px;" data-parsley-trigger="input" data-parsley-required="true" Value="0"><br>
-                        </div>
-
-                        <div class="col-md-3">
-                            <label for="GoldCleats" class="form-label">Gold Cleats</label>
-                            <a data-toggle="tooltip" title="The calculator will assume that cleats will be spent at the start of each month to purchase Uma/Card Scout Tickets. It also assumes that cleats will be spent on SR Tickets as well. Uma Tickets will be prioritized over Card Tickets."><i class="bi bi-question-circle"></i></a>
-                            <input type="number" id="GoldCleats" class="form-control" style="max-width: 300px;" data-parsley-trigger="input" data-parsley-required="true" Value="0"><br>
-                        </div>
-
-                        <div class="col-md-3">
-                            <label for="SilverCleats" class="form-label">Silver Cleats</label>
-                            <a data-toggle="tooltip" title="The calculator will assume that cleats will be spent at the start of each month to purchase Uma/Card Scout Tickets. It also assumes that cleats will be spent on SR Tickets as well. Uma Tickets will be prioritized over Card Tickets."><i class="bi bi-question-circle"></i></a>
-                            <input type="number" id="SilverCleats" class="form-control" style="max-width: 300px;" data-parsley-trigger="input" data-parsley-required="true" Value="0"><br>
-                        </div>
-                    </div>
-
-                    <hr><h2>PVP</h2><br>
-                    <div class="row">
-                        <div class="col-md-3">
-                            <h3>Team Trials</h3>
-                            <label for="TeamTrialsClass" class="form-label">Team Trials Class</label>
-                            <input type="number" id="TeamTrialsClass" class="form-control" style="max-width: 300px; margin-bottom: 15px" data-parsley-trigger="input" data-parsley-required="true" data-parsley-range="[1,6]" min="1" max="6" Value="1">
-                        </div>
-
-                        <div class="col-md-6">
-                            <h3>
-                                Champions Meeting <a data-toggle="tooltip" title="The calculator will only factor in rewards from future CMs."><i class="bi bi-question-circle"></i></a>
-                             </h3>
-
-                            <label for="CMLeague" class="form-label">League</label>
-                            <select id="CMLeague" class="form-select" style="max-width: 300px; margin-bottom: 15px">
-                                <option value="1">Open</option>
-                                <option value="2">Graded</option>
-                            </select>
-
-                            <h4>Round 1</h4>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <label for="CMR1Sets" class="form-label">Number of Sets</label>
-                                    <input type="number" id="CMR1Sets" class="form-control" style="max-width: 300px; margin-bottom: 15px" data-parsley-trigger="input" data-parsley-required="true" data-parsley-range="[0,8]" min="0" max="8" Value="0">
-                                </div>
-                                    
-                                <div class="col-md-6">
-                                    <label for="CMR1WR" class="form-label">Win Rate (%)</label>
-                                    <input type="number" id="CMR1WR" class="form-control" style="max-width: 300px; margin-bottom: 15px" data-parsley-trigger="input" data-parsley-required="true" data-parsley-range="[0,100]" min="0" max="100" Value="0">
-                                </div>
-                            </div>
-
-
-                            <h4>Round 2</h4>
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <label for="CMR2Group" class="form-label">Group</label>
-                                    <select id="CMR2Group" class="form-select" style="max-width: 300px; margin-bottom: 15px">
-                                        <option value="1">A</option>
-                                        <option value="2">B</option>
-                                    </select>
-                                </div>
-
-                                <div class="col-md-4">
-                                    <label for="CMR2Sets" class="form-label">Number of Sets</label>
-                                    <input type="number" id="CMR2Sets" class="form-control" style="max-width: 300px; margin-bottom: 15px" data-parsley-trigger="input" data-parsley-required="true" data-parsley-range="[0,8]" min="0" max="8" Value="0">
-                                </div>
-
-                                <div class="col-md-4">
-                                    <label for="CMR2WR" class="form-label">Win Rate (%)</label>
-                                    <input type="number" id="CMR2WR" class="form-control" style="max-width: 300px; margin-bottom: 15px" data-parsley-trigger="input" data-parsley-required="true" data-parsley-range="[0,100]" min="0" max="100" Value="0">
-                                </div>
-                            </div>
-
-                            <h4>Round 3</h4>
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <div class="form-check form-check-inline">
-                                        <input type="checkbox" id="CMR3Qualify" class="form-check-input">
-                                        <label for="CMR3Qualify" class="form-label">Qualify</label>
-                                    </div>
-                                </div>
-
-                                <script type="text/javascript">
-                                    $('#CMR3Qualify').change(function() {
-                                        if ($('#CMR3Qualify').is(':checked')) {
-                                            $('#CMR3Group, label[for="CMR3Group"], #CMR3Placement, label[for="CMR3Placement"]').show();
-                                        }
-                                        else {
-                                            $('#CMR3Group, label[for="CMR3Group"], #CMR3Placement, label[for="CMR3Placement"]').hide();
-                                        };
-                                    });
-                                </script>
-
-                                <div class="col-md-4">
-                                    <label for="CMR3Group" class="form-label" style="display: none;">Group</label>
-                                    <select id="CMR3Group" class="form-select" style="max-width: 300px; margin-bottom: 15px; display: none;">
-                                        <option value="1">A</option>
-                                        <option value="2">B</option>
-                                    </select>
-                                </div>
-
-                                <div class="col-md-4">
-                                    <label for="CMR3Placement" class="form-label" style="display: none;">Placement</label>
-                                    <input type="number" id="CMR3Placement" class="form-control" style="max-width: 300px; margin-bottom: 15px; display: none;" data-parsley-trigger="input" data-parsley-required="true" data-parsley-range="[1,3]" min="1" max="3" Value="3">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-3">
-                            <h3>Club Rewards</h3>
-                            <label for="ExpectedClubRank" class="form-label">Expected Club Ranking</label>
-                            <a data-toggle="tooltip" title="The grade ranking ranges have not been pulled from any official sources, and as such may not be entirely accurate."><i class="bi bi-question-circle"></i></a>
-                            <select id="ExpectedClubRank" class="form-select" style="max-width: 300px; margin-bottom: 15px">
-                                <option value="1">SS (1-10)</option>
-                                <option value="2">S+ (11-30)</option>
-                                <option value="3">S &nbsp;&nbsp;(31-100)</option>
-                                <option value="4">A+ (101-500)</option>
-                                <option value="5">A &nbsp;&nbsp;(501-1000)</option>
-                                <option value="6">B+ (1001-3000)</option>
-                                <option value="7">B &nbsp;&nbsp;(3001-5000)</option>
-                                <option value="8">C+ (5001-7000)</option>
-                                <option value="9">C &nbsp;&nbsp;(7001-10000)</option>
-                                <option value="10">D+ (10001-30000)</option>
-                                <option value="11">D &nbsp;&nbsp;(> 30000)</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div>
-                        <hr>
-                        <h2>
-                            Events <a data-toggle="tooltip" title="The calculator will only factor in rewards from future Events"><i class="bi bi-question-circle"></i></a>
-                        </h2>
-                        <br>
-
-                        <div class="row">
-                            <div class="col-md-2"></div>
-
-                            <div class="col-md-4">
-                                <div class="btn-group-vertical" style="max-width: 300px; margin-bottom: 15px">
-                                    Event Content Usually Completed:
-
-                                    <div class="form-check form-check-inline">
-                                        <input type="checkbox" id="CompletesEventStories" class="form-check-input">
-                                        <label for="CompletesEventStories" class="form-label">Stories</label>
-                                    </div>
-
-                                    <div class="form-check form-check-inline">
-                                        <input type="checkbox" id="CompletesEventBingoCards" class="form-check-input">
-                                        <label for="CompletesEventBingoCards" class="form-label">Bingo Cards</label>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-md-4">
-                                <label for="ExpectedEventPoints" class="form-label">Expected Event Points</label>
-                                <select id="ExpectedEventPoints" class="form-select" style="max-width: 300px; margin-bottom: 15px"></select>
-                                
-                                <script type="text/javascript">
-                                    $('#ExpectedEventPoints').append($('<option>', {
-                                        value: 0,
-                                        text: `0 - ${StoryEventRewards[0].Points-1}`,
-                                    }));
-
-                                    for (let i = 0; i < StoryEventRewards.length; i++) {
-                                        let Text;
-
-                                        if (i < StoryEventRewards.length - 1) {
-                                            Text = `${StoryEventRewards[i].Points.toLocaleString()} - ${(StoryEventRewards[i+1].Points-1).toLocaleString()}`;
-                                        }
-                                        else {
-                                            Text = `${StoryEventRewards[i].Points.toLocaleString()}+`
-                                        };
-                                        Text += ` (+${StoryEventRewards[i].Quantity} ${StoryEventRewards[i].RewardType.Label})`
-
-                                        $('#ExpectedEventPoints').append($('<option>', {
-                                            value: i+1,
-                                            text: Text,
-                                        }));
-                                    };
-                                </script>
-                            </div>
-
-                            <div class="col-md-2"></div>
-                        </div>
-
-                    </div>
 
                     <div>
                         <hr>
@@ -692,147 +471,10 @@
                         </div>
                     </div>
 
-                    <div class="accordion">
-                        <div class="accordion-item">
-                            <h2 class="accordion-header" id="ScoutPlanningTableAccordion">
-                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#ScoutPlanningTableAccordionContent" aria-expanded="true" aria-controls="ScoutPlanningTableAccordionContent">
-                                    <h4 class="d-block w-100 text-center">Scout Planning Table</h4>
-                                </button>
-                            </h2>
-                            <div id="ScoutPlanningTableAccordionContent" class="accordion-collapse show" aria-labelledby="ScoutPlanningTableAccordion" data-bs-parent="#ScoutPlanningTableAccordion">
-                                <div class="accordion-body" style="overflow-x: auto; padding: 5px;">
-                                    <table id="ScoutPlanningTable" class="table table-bordered table-striped" style="font-size: min(3vw, 16px); text-align: center; border: 1px;">
-                                        <thead>
-                                            <tr>
-                                                <th style="width: 10%;">
-                                                    <!-- Vertical Grip -->
-                                                </th>
-                                                <th style="width: 20%; min-width: 80px;"> <!-- TODO: Make the accel rate dynamic. -->
-                                                    Banner <a data-toggle="tooltip" title="The calculator currently assumes that banners start/end at 12:00 AM (00:00). Dates are calculated based on the number of days between the Japanese server's launch and the banner's start date on that server. This number is then divided by the global acceleration rate (1.44) and is used to estimate the banner's global start date, based on the global server's launch date. The banner duration remains unchanged. For banners that have already been announced, the global dates will be entered manually."><i class="bi bi-question-circle" style="color: black;"></i></a>
-                                                </th>
-                                                <th style="width: 20%; min-width: 80px;">
-                                                    Copies <a data-toggle="tooltip" title="You can sort items by dragging and dropping them. Exchange points will be used on items in order from highest to lowest."><i class="bi bi-question-circle" style="color: black;"></i></a>
-                                                </th>
-                                                <th style="width: 40%; min-width: 80px;">
-                                                    Banner Config
-                                                </th>
-                                                <th style="width: 10%;">
-                                                    <!-- Remove Button -->
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="ScoutPlanningTableBody">
-                                            <tr id="ScoutPlanningLoadingMessage"><td colspan="5">Loading...</td></tr>
-
-                                            <!--- Rows will be added by the script below. --->
-                                        </tbody>
-                                        <tfoot>
-                                            <tr>
-                                                <td colspan="7">
-                                                    <button id="AddRowButton" type="button" style="width: 100%" class="btn btn-add">
-                                                        <b><i class="bi bi-plus-lg" style="font-size: 30px; font-weight: bold; color: white;"></i></b>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        </tfoot>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
+                    <div id="TasksTablesDiv">
                     </div>
 
                     <script type="text/javascript">
-                        function AddScoutPlanRow() {
-                            let NewRow = $(
-                                `<tr data-scoutplan-rowid="${NewScoutPlanRowID}">
-                                    <td class="handle" style="vertical-align: middle;"><i class="bi bi-arrows-move" style="font-size: 20px"></i></td>
-                                    <td>
-                                        <div class="ScoutPlanBanner" data-banner-id="0"></div>
-
-                                        <button type="button" class="ScoutPlanSelector btn btn-add" style="width: 90%" data-bs-toggle="modal" data-bs-target="#SelectionModal">
-                                            <i class="bi bi-plus-lg" style="font-size: 20px; color: white;"></i>
-                                        </button>
-
-                                        <div class="OutOfOrderMessage TableValidation">Banner start dates must be in chronological order.</div>
-                                        <div class="DuplicateBannerMessage TableValidation">Duplicate banner.</div>
-                                    </td>
-                                    <td class="ScoutPlanGoalsCell"></td>
-                                    <td>
-                                        <div class="row">
-                                            <div class="col-lg-4">
-                                                <label class="form-label">
-                                                    Exchange Pts
-                                                    <input type="number" class="ScoutPlanExchangePoints form-control" data-parsley-trigger="input" data-parsley-required="true" Value="0" min="0" data-parsley-min="0">
-                                                </label>
-                                            </div>
-
-                                            <div class="col-lg-4">
-                                                <label class="form-label">
-                                                    Scout Limit
-                                                    <input type="number" class="ScoutPlanLimit form-control" data-parsley-trigger="input" min="1" data-parsley-min="1">
-                                                </label>
-                                            </div>
-
-                                            <div class="col-lg-4">
-                                                <label class="form-label">
-                                                    Free Pulls
-                                                    <input type="number" class="ScoutPlanFreePulls form-control" data-parsley-trigger="input" data-parsley-required="true" Value="0" min="0" data-parsley-min="0">
-                                                </label>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="row">
-                                            <div class="col-lg-4">
-                                                <label class="form-label">
-                                                    <input type="checkbox" class="ScoutPlanActive form-check-input" onchange="ToggleScoutPlanRow(this, ${NewScoutPlanRowID}); ValidateScoutPlanningTable();" checked>
-                                                    Active
-                                                </label>
-                                            </div>
-
-                                            <div class="col-lg-4">
-                                                <label class="form-label">
-                                                    <input type="checkbox" class="ScoutPlanPriorityBanner form-check-input">
-                                                    High Priority
-                                                </label>
-                                            </div>
-
-                                            <div class="col-lg-4">
-                                                <label class="form-label" style="display: none;">
-                                                    <input type="checkbox" class="ScoutPlanUseRainbowCrystals form-check-input"
-                                                        onchange="SkipTableElement(this, 'CardOwnedSkipGroup', ${NewScoutPlanRowID});"
-                                                    >
-                                                    Use Rainbow Uncap Crystals
-                                                </label>
-                                                <div id="CardOwnedSkipGroup${NewScoutPlanRowID}" style="display: none;">
-                                                    <label class="form-label">
-                                                        <input type="checkbox" class="ScoutPlanCardOwned1 form-check-input"> Card 1 Owned
-                                                    </label>
-                                                    <label class="form-label">
-                                                        <input type="checkbox" class="ScoutPlanCardOwned2 form-check-input"> Card 2 Owned
-                                                    </label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <button type="button" class="btn btn-danger" onclick="$('tr[data-scoutplan-rowid=${NewScoutPlanRowID}]').remove(); ValidateScoutPlanningTable(); CheckForUnsavedChanges();">
-                                            <i class="bi bi-x-lg" style="font-weight: bold;"></i>
-                                        </button>
-                                    </td>
-                                </tr>`
-                            );
-
-                            $('#ScoutPlanningTableBody').append(NewRow);
-                            $('#ScoutPlanningTableBody').sortable("refresh");
-
-                            $(`tr[data-scoutplan-rowid=${NewScoutPlanRowID}] .ScoutPlanGoalsCell`).sortable();
-                            $(`tr[data-scoutplan-rowid=${NewScoutPlanRowID}] input, tr[data-scoutplan-rowid=${NewScoutPlanRowID}] select`).addClass('ScoutPlanField TableField');
-
-                            SetParsleyValidations();
-                            UpdateUnsavedChangesListener();
-                            NewScoutPlanRowID++;
-                        };
-
                         let Select2Config = {
                             closeOnSelect: false,
                             placeholder: "Please Select",
@@ -869,49 +511,12 @@
 
                                 AddScoutPlanRow();
                             });
-
-                            if (localStorage.getItem("UmaSessionState") == null) {
-                                // We want the table to load with 3 rows by default. We will also have these rows use the 3 closest banners and select up to 3 items from that banner.
-                                let Selected = [];
-                                let PreviousBannerID = 0;
-                                for (let i = 0; i < ItemsInfo.length; i++) {
-                                    if (ItemsInfo[i].GlobalEndDate >= Today && ItemsInfo[i].Disabled != true) {
-                                        if (ItemsInfo[i].BannerID != PreviousBannerID) {
-
-                                            if (NewScoutPlanRowID >= 3) {
-                                                break;
-                                            };
-
-                                            Selected = [];
-                                            PreviousBannerID = ItemsInfo[i].BannerID;
-                                            AddScoutPlanRow();
-                                        };
-
-                                        let TargetRow = $(`tr[data-scoutplan-rowid=${NewScoutPlanRowID-1}]`);
-
-                                        if (TargetRow.find('.ScoutPlanBanner').attr('data-banner-id') == 0) {
-                                            TargetRow.find('.ScoutPlanBanner').attr('data-banner-id', ItemsInfo[i].BannerID).html(BannersInfo[ItemsInfo[i].BannerID].Name);
-
-                                            if (ItemsInfo[i].Type == BannerTypes.Card.Value) {
-                                                TargetRow.find('.ScoutPlanUseRainbowCrystals').parent().show();
-                                            };
-                                        };
-
-                                        if (TargetRow.find('.ScoutPlanGoalsCell').find('label').length < 3) {
-                                            TargetRow.find('.ScoutPlanGoalsCell').append($(`
-                                                <label class="form-label" data-item-id=${i}>
-                                                    ${ItemsInfo[i].Name}
-                                                    <input type="number" class="ScoutPlanGoal ScoutPlanField TableField form-control" data-parsley-trigger="input" data-parsley-required="true" data-parsley-min="0" min="0" Value="1">
-                                                </label>
-                                            `));
-                                        };
-                                    };
-                                };
-                            };
                         });
 
                         function ValidateScoutPlanningTable() {
                             clearTimeout(UpdateTableTimeout);
+
+                            // console.log('yo');
 
                             UpdateTableTimeout = setTimeout(function() {
                                 $('.TableValidation').hide();
@@ -1366,22 +971,26 @@
                 UpdateUnsavedChangesListener();
 
                 /* When leaving the page, we will save the users form inputs to local storage so that we can import them again after the page
-                has been refreshed. This is needed to reconstruct the scout planning table. We are calling this variable UmaSessionState
+                has been refreshed. This is needed to reconstruct the scout planning table. We are calling this variable TaskTrackerSessionState
                 instead of just SessionState as that var name is used by the Genshin calculator and we don't want any storage conflicts. */
                 $(document).on('visibilitychange', function() {
                     if (UnsavedChanges) {
-                        localStorage.setItem("UmaSessionState", JSON.stringify(CompileForm()));
+                        localStorage.setItem("TaskTrackerSessionState", JSON.stringify(CompileForm()));
                     };
                 });
 
-                let UmaSessionState = localStorage.getItem("UmaSessionState");
+                let TaskTrackerSessionState = localStorage.getItem("TaskTrackerSessionState");
 
-                if (UmaSessionState != null) {
+                // console.log(TaskTrackerSessionState !== null);
+                if (TaskTrackerSessionState != null) {
+
                     // TODO: Add a toggle to turn this off.
-                    Import(RunCalcs=false, ImportState=UmaSessionState, Scroll=false);
+                    Import(RunCalcs=false, ImportState=TaskTrackerSessionState, Scroll=false);
                 }
                 else {
                     ImportInProgress = false;
+                    $('.TasksTableLoadingMessage').hide();
+                    $('.TasksTable thead').hide()
                 };
 
                 window.onbeforeunload = function() {
