@@ -128,10 +128,7 @@ function AddTasksPlanRow(TableID) {
         `<tr data-tasks-plan-rowid="${NewTasksPlanRowID}" data-tasks-plan-type="${value}">
             <td class="handle" style="vertical-align: middle;"><i class="bi bi-arrows-move" style="font-size: 20px"></i></td>
             <td>
-                <label class="form-label" style="width: 100%;">
-                    Name:
-                    <input type="text" class="TasksPlanItem form-control">
-                </label>
+                <input type="text" class="TasksPlanItem form-control" style="width: 100%;">
             </td>
             <td>
                 <div class="row">
@@ -145,10 +142,7 @@ function AddTasksPlanRow(TableID) {
                 <span class='TasksPlanCountdown'></span>
             </td>
             <td>
-                <label class="form-label" style="width: 100%;">
-                    Notes:
-                    <textarea class="TasksPlanNotes TasksPlanField TableField form-control" rows="1"></textarea>
-                </label>
+                <textarea class="TasksPlanNotes TasksPlanField TableField form-control" rows="1" style="width: 100%;"></textarea>
             </td>
             <td class="td-label">
                 <label class="td-label">

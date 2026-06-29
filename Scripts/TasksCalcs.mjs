@@ -71,7 +71,7 @@ function RenderScoutResults(ScoutConfig) {
                         <br>
                         ${Row.find('.TasksPlanCountdown').html()}
                     </td>
-                    <td>${BannerPlan.Item}</td>
+                    <td>${BannerPlan.Notes}</td>
                 </tr>
             `
             $('#TasksPlanningResultsBody').append($(NewRow));
