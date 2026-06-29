@@ -62,7 +62,7 @@ function RenderScoutResults(ScoutConfig) {
 
         // console.log(moment(`${BannerPlan.DueDate} ${BannerPlan.DueTime}`).format('MM/DD/YYYY hh:mm:ss A'))
         
-        if (!BannerPlan.Completed) {
+        if (!$('#HideCompletedFromReport').prop('checked') || !BannerPlan.Completed) {
             let NewRow = `
                 <tr class="ScoutPlanResultsRow">
                     <td>${BannerPlan.Item}</td>
@@ -70,6 +70,14 @@ function RenderScoutResults(ScoutConfig) {
                         ${moment(`${BannerPlan.DueDate} ${BannerPlan.DueTime}`).format('MM/DD/YYYY hh:mm A')}
                         <br>
                         ${Row.find('.TasksPlanCountdown').html()}
+                    </td>
+                    <td class="td-label">
+                        <label class="td-label">
+                            <input type="checkbox" class="TableField form-check-input" onclick="
+                                $('tr[data-tasks-plan-rowid=${BannerPlan.RowID}]').find('.TasksPlanCompleted').prop('checked', $(this).prop('checked')).change();
+                                CheckForUnsavedChanges();
+                            ">
+                        </label>
                     </td>
                     <td>${BannerPlan.Notes}</td>
                 </tr>

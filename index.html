@@ -275,6 +275,12 @@
                     </div>
                     <br>
 
+                    <div class="form-check form-check-inline form-switch">
+                        <input type="checkbox" id="HideCompletedFromReport" class="form-check-input">
+                        <label for="HideCompletedFromReport" class="form-label">Hide completed tasks in report table</label>
+                    </div>
+                    <br>
+
                     <div id="TasksAccordionSettings" class="btn-group-horizontal" style="/*max-width: 300px;*/ margin-bottom: 15px">
                         Open on page load:
                     </div>
@@ -540,7 +546,10 @@
                             <th style="width: 30%; min-width: 80px;">
                                 Next Deadline <a data-toggle="tooltip" title="This will update automatically for daily, weekly, and monthly tables."><i class="bi bi-question-circle" style="color: black;"></i></a>
                             </th>
-                            <th style="width: 40%; min-width: 80px;">
+                            <th style="width: 10%; min-width: 80px;">
+                                Completed
+                            </th>
+                            <th style="width: 30%; min-width: 80px;">
                                 Notes
                             </td>
                         </tr>
