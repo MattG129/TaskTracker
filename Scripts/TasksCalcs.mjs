@@ -33,136 +33,51 @@ function DayOfWeek(Date) {
     return (DOW == 0 ? 7 : DOW);
 };
 
-function ScoutPlanningCalculator(ScoutConfig) {
+function TasksPlanningCalculator(ScoutConfig) {
+    // console.log(ScoutConfig.TasksPlanArray);
+
+    ScoutConfig.TasksPlanArray.sort((a, b) => {
+        let dateCompare = a.DueDate.localeCompare(b.DueDate);
+
+        if (dateCompare !== 0) {
+            return dateCompare;
+        }
+
+        return a.DueTime.localeCompare(b.DueTime);
+    });
+    // console.log(ScoutConfig.TasksPlanArray);
+
     ScoutConfig.ActiveScoutItems = 0;
     ScoutConfig.ActiveScoutPlanArray = [];
 
-    for (let i = 0; i < ScoutConfig.ScoutPlanArray.length; i++) {
-        if (ScoutConfig.ScoutPlanArray[i].Active) {
-
-            let ScoutPlan = ScoutConfig.ScoutPlanArray[i];
-
-            let BannerPlan = {
-                Items: [],
-                Limit: ScoutPlan.Limit,
-                ExchangePoints: ScoutPlan.ExchangePoints,
-                FreePulls: Number(ScoutPlan.FreePulls),
-                UseRainbowCrystals: ScoutPlan.UseRainbowCrystals,
-                CardOwned1: ScoutPlan.CardOwned1,
-                CardOwned2: ScoutPlan.CardOwned2,
-                ItemsRemaining: [],
-                TotalItemsRemaining: 0,
-                ItemRates: [],
-                SumOfItemRates: 0
-            };
-            for (let j = 0; j < ScoutPlan.Items.length; j++) {
-                ScoutPlan.Goals[ScoutPlan.Items[j]] = Number(ScoutPlan.Goals[ScoutPlan.Items[j]]); // Need to make sure this is converted from a string to a number.
-
-                if (ScoutPlan.Goals[ScoutPlan.Items[j]] > 0) {
-                    BannerPlan.Items.push({
-                        ID: ScoutPlan.Items[j],
-                        Goal: ScoutPlan.Goals[ScoutPlan.Items[j]]
-                    });
-
-                    BannerPlan.ItemsRemaining.push(ScoutPlan.Goals[ScoutPlan.Items[j]]);
-                    BannerPlan.TotalItemsRemaining += ScoutPlan.Goals[ScoutPlan.Items[j]];
-
-                    BannerPlan.ItemRates.push(ItemsInfo[ScoutPlan.Items[j]].Rate);
-                    BannerPlan.SumOfItemRates += ItemsInfo[ScoutPlan.Items[j]].Rate;
-                };
-            };
-
-            if (BannerPlan.Items.length > 0) {
-                Object.assign(BannerPlan, ItemsInfo[ScoutPlan.Items[0]]); // We can use item 0 since all of them will have the same date info.
-
-                let SavingsResults = SavingsCalculator(ScoutConfig, BannerPlan);
-                Object.assign(BannerPlan, SavingsResults);
-
-                ScoutConfig.ActiveScoutPlanArray.push(BannerPlan);
-                ScoutConfig.ActiveScoutItems += ScoutPlan.Items.length;
-            };
-        };
-    };
-
-    let ScoutsResults = RunAndEvaluateScoutSimulations(ScoutConfig);
-
-    RenderScoutResults(ScoutConfig, ScoutsResults);
+    RenderScoutResults(ScoutConfig);
 };
 
-function RenderScoutResults(ScoutConfig, ScoutsResults) {
+function RenderScoutResults(ScoutConfig) {
     $('#ScoutResultsTable .ScoutPlanResultsRow').remove();
 
-    let PCScouts = 0;
-    let UmaTicketScouts = 0;
-    let CardTicketScouts = 0;
-    let FCScouts = 0;
+    for (let i = 0; i < ScoutConfig.TasksPlanArray.length; i++) {
+        let BannerPlan = ScoutConfig.TasksPlanArray[i];
+        let Row = $(`tr[data-tasks-plan-rowid="${BannerPlan.RowID}"]`)
 
-    let ScoutItemNumber = 0;
+        // console.log(moment(`${BannerPlan.DueDate} ${BannerPlan.DueTime}`).format('MM/DD/YYYY hh:mm:ss A'))
+        
+        if (!BannerPlan.Completed) {
+            let NewRow = `
+                <tr class="ScoutPlanResultsRow">
+                    <td>${BannerPlan.Item}</td>
+                    <td>
+                        ${moment(`${BannerPlan.DueDate} ${BannerPlan.DueTime}`).format('MM/DD/YYYY hh:mm A')}
+                        <br>
+                        ${Row.find('.TasksPlanCountdown').html()}
+                    </td>
+                    <td>${BannerPlan.Item}</td>
+                </tr>
+            `
+            $('#TasksPlanningResultsBody').append($(NewRow));
+        }
 
-    for (let i = 0; i < ScoutConfig.ActiveScoutPlanArray.length; i++) {
-        let BannerPlan = ScoutConfig.ActiveScoutPlanArray[i];
-
-        let First = true;
-        let MaxScouts;
-        let ThisBannerPCScouts = 0;
-        let MaxPCScouts = Math.min( DateDiff(Today, BannerPlan.GlobalEndDate), BannerPlan.BannerLength + 1, BannerPlan.MaxPCScouts - PCScouts );
-        let FreePulls = BannerPlan.FreePulls;
-        for (let j = 0; j < BannerPlan.Items.length; j++) {
-
-            let Item = BannerPlan.Items[j];
-
-            if (First) {
-                MaxScouts = MaxPCScouts;
-                MaxScouts += BannerPlan.MaxPinkTicketScouts - (BannerPlan.Type == BannerTypes.Uma.Value ? UmaTicketScouts : CardTicketScouts);
-                MaxScouts += BannerPlan.MaxFCScouts - FCScouts;
-                MaxScouts += BannerPlan.FreePulls;
-
-                if (BannerPlan.Limit != '') {
-                    MaxScouts = Math.min(MaxScouts, BannerPlan.Limit)
-                };
-            };
-
-            for (let k = 0; k < Item.Goal; k++) {
-                if (FreePulls > 0) {
-                    FreePulls -= 1;
-                }
-                else if (MaxPCScouts > ThisBannerPCScouts) {
-                    ThisBannerPCScouts += 1;
-                }
-                else if (BannerPlan.Type == BannerTypes.Uma.Value && BannerPlan.MaxPinkTicketScouts > UmaTicketScouts) {
-                    UmaTicketScouts += 1;
-                }
-                else if (BannerPlan.Type == BannerTypes.Card.Value && BannerPlan.MaxPinkTicketScouts > CardTicketScouts) {
-                    CardTicketScouts += 1;
-                }
-                else if (BannerPlan.MaxFCScouts > FCScouts) {
-                    FCScouts += 1;
-                };
-            };
-
-            let NewRow = '<tr class="ScoutPlanResultsRow">'
-            if (First) {
-                NewRow +=  `<td rowspan="${BannerPlan.Items.length}">${BannersInfo[ ItemsInfo[Item.ID].BannerID ].Name}</td>
-                            <td rowspan="${BannerPlan.Items.length}">${MaxScouts}</td>`
-            };
-            NewRow +=      `<td>${ItemsInfo[Item.ID].Name}</td>
-                            <td>${Item.Goal}</td>
-                            <td>${ScoutsResults.ScoutItemResults[ScoutItemNumber]}</td>
-                          </tr>`
-
-            $('#ScoutPlanningResultsBody').append($(NewRow));
-
-            ScoutItemNumber++;
-            First = false;
-        };
-        PCScouts += ThisBannerPCScouts;
     };
-
-    $('#ScoutResultsTable tfoot').append($(
-        `<tr class="ScoutPlanResultsRow">
-            <td colspan="5"><b>Chance of reaching all scout goals: ${ScoutsResults.TotalSuccessRate}</b></td>
-        </tr>`
-    ));
 
     $('#ScoutResultsTable').show();
 };

@@ -14,8 +14,8 @@ $(function() {
 
         TasksAccordionSettingsHTML += `
             <div class="form-check form-check-inline form-switch">
-                <input type="checkbox" id="${key}AccLoadOpen" class="form-check-input">
-                <label for="${key}AccLoadOpen" class="form-label">${label}</label>
+                <input type="checkbox" id="AccLoadOpen${value}" class="form-check-input">
+                <label for="AccLoadOpen${value}" class="form-label">${label}</label>
             </div>
         `
     };
@@ -25,8 +25,7 @@ $(function() {
 
 let TasksTablesHTML = ``;
 $(function() {
-
-// console.log('yo');
+    NewTasksPlanRowID = 0;
 
     let JSONImport;
     try {
@@ -38,49 +37,53 @@ $(function() {
         let label = TasksTableTypes[key].label;
 
         let Open = false;
-        if (Object.hasOwn(JSONImport, `${key}AccLoadOpen`)) {
-            Open = JSONImport[`${key}AccLoadOpen`];
+        if (Object.hasOwn(JSONImport, `AccLoadOpen${value}`)) {
+            Open = JSONImport[`AccLoadOpen${value}`];
         };
 
-        console.log(Open, `${key}AccLoadOpen`);
+        // console.log(Open, `AccLoadOpen${value}`);
 
         TasksTablesHTML += `
             <div class="accordion">
                 <div class="accordion-item">
-                    <h2 class="accordion-header" id="${key}TasksAccordion">
-                        <button class="accordion-button ${Open ? '' : 'collapsed'}" type="button" data-bs-toggle="collapse" data-bs-target="#${key}TasksTableAccordionContent" aria-expanded="${Open}" aria-controls="${key}TasksTableAccordionContent">
+                    <h2 class="accordion-header" id="TasksAccordion${value}">
+                        <button class="accordion-button ${Open ? '' : 'collapsed'}" type="button" data-bs-toggle="collapse" data-bs-target="#TasksTableAccordionContent${value}" aria-expanded="${Open}" aria-controls="TasksTableAccordionContent${value}">
                             <h4 class="d-block w-100 text-center">${label} Tasks</h4>
                         </button>
                     </h2>
-                    <div id="${key}TasksTableAccordionContent" class="accordion-collapse ${Open ? '' : 'collapse'}" aria-labelledby="${key}TasksTableAccordion" data-bs-parent="#${key}TasksTableAccordion">
+                    <div id="TasksTableAccordionContent${value}" class="accordion-collapse ${Open ? '' : 'collapse'}" aria-labelledby="TasksTableAccordion${value}" data-bs-parent="#TasksTableAccordion${value}">
                         <div class="accordion-body" style="overflow-x: auto; padding: 5px;">
-                            <table id="${key}TasksTable" class="TasksTable table table-bordered table-striped" style="font-size: min(3vw, 16px); text-align: center; border: 1px;">
+                            <table id="TasksTable${value}" class="TasksTable table table-bordered table-striped" style="font-size: min(3vw, 16px); text-align: center; border: 1px;">
                                 <thead>
                                     <tr>
                                         <th style="width: 10%;">
                                             <!-- Vertical Grip -->
                                         </th>
-                                        <th style="width: 20%; min-width: 80px;"> <!-- TODO: Make the accel rate dynamic. -->
-                                            Banner <a data-toggle="tooltip" title="The calculator currently assumes that banners start/end at 12:00 AM (00:00). Dates are calculated based on the number of days between the Japanese server's launch and the banner's start date on that server. This number is then divided by the global acceleration rate (1.44) and is used to estimate the banner's global start date, based on the global server's launch date. The banner duration remains unchanged. For banners that have already been announced, the global dates will be entered manually."><i class="bi bi-question-circle" style="color: black;"></i></a>
+                                        <th style="width: 20%; min-width: 80px;">
+                                            Task
+                                        </th>
+                                        <th style="width: 30%; min-width: 80px;">
+                                            Next Deadline <a data-toggle="tooltip" title="This will update automatically for daily, weekly, and monthly tables."><i class="bi bi-question-circle" style="color: black;"></i></a>
                                         </th>
                                         <th style="width: 20%; min-width: 80px;">
-                                            Copies <a data-toggle="tooltip" title="You can sort items by dragging and dropping them. Exchange points will be used on items in order from highest to lowest."><i class="bi bi-question-circle" style="color: black;"></i></a>
+                                            Notes
+                                        </td>
+                                        <th style="width: 10%; min-width: 80px;">
+                                            Completed
                                         </th>
-                                        <th style="width: 40%; min-width: 80px;">
-                                            Banner Config
-                                        </th>
+
                                         <th style="width: 10%;">
                                             <!-- Remove Button -->
                                         </th>
                                     </tr>
                                 </thead>
-                                <tbody id="${key}TasksTableBody">
-                                    <tr id="${key}TasksLoadingMessage" class="TasksTableLoadingMessage"><td colspan="5">Loading...</td></tr>
+                                <tbody id="TasksTableBody${value}">
+                                    <tr id="TasksLoadingMessage${value}" class="TasksTableLoadingMessage"><td colspan="6">Loading...</td></tr>
                                 </tbody>
                                 <tfoot>
                                     <tr>
                                         <td colspan="7">
-                                            <button id="AddRowButton" type="button" style="width: 100%" class="btn btn-add">
+                                            <button id="AddRowButton" type="button" style="width: 100%" class="btn btn-add" onclick="AddTasksPlanRow(${value});">
                                                 <b><i class="bi bi-plus-lg" style="font-size: 30px; font-weight: bold; color: white;"></i></b>
                                             </button>
                                         </td>
@@ -96,112 +99,160 @@ $(function() {
     };
 
     $('#TasksTablesDiv').html(TasksTablesHTML);
+
+    for (let key in TasksTableTypes) {
+        $(`#TasksTableBody${TasksTableTypes[key].value}`).sortable({
+            handle: ".handle",
+            update: function() {
+                ValidateTasksPlanningTable();
+                UnsavedChanges = true;
+            }
+        });
+    };
 });
 
-function AddScoutPlanRow() {
+function AddTasksPlanRow(TableID) {
+    let value; let label;
+    for (let key in TasksTableTypes) {
+        if (TasksTableTypes[key].value == TableID) {
+            value = TasksTableTypes[key].value;
+            label = TasksTableTypes[key].label;
+            break;
+        };
+    };
+
     let NewRow = $(
-        `<tr data-scoutplan-rowid="${NewScoutPlanRowID}">
+        `<tr data-tasks-plan-rowid="${NewTasksPlanRowID}" data-tasks-plan-type="${value}">
             <td class="handle" style="vertical-align: middle;"><i class="bi bi-arrows-move" style="font-size: 20px"></i></td>
             <td>
-                <div class="ScoutPlanBanner" data-banner-id="0"></div>
-
-                <button type="button" class="ScoutPlanSelector btn btn-add" style="width: 90%" data-bs-toggle="modal" data-bs-target="#SelectionModal">
-                    <i class="bi bi-plus-lg" style="font-size: 20px; color: white;"></i>
-                </button>
-
-                <div class="OutOfOrderMessage TableValidation">Banner start dates must be in chronological order.</div>
-                <div class="DuplicateBannerMessage TableValidation">Duplicate banner.</div>
-            </td>
-            <td class="ScoutPlanGoalsCell"></td>
-            <td>
-                <div class="row">
-                    <div class="col-lg-4">
-                        <label class="form-label">
-                            Exchange Pts
-                            <input type="number" class="ScoutPlanExchangePoints form-control" data-parsley-trigger="input" data-parsley-required="true" Value="0" min="0" data-parsley-min="0">
-                        </label>
-                    </div>
-
-                    <div class="col-lg-4">
-                        <label class="form-label">
-                            Scout Limit
-                            <input type="number" class="ScoutPlanLimit form-control" data-parsley-trigger="input" min="1" data-parsley-min="1">
-                        </label>
-                    </div>
-
-                    <div class="col-lg-4">
-                        <label class="form-label">
-                            Free Pulls
-                            <input type="number" class="ScoutPlanFreePulls form-control" data-parsley-trigger="input" data-parsley-required="true" Value="0" min="0" data-parsley-min="0">
-                        </label>
-                    </div>
-                </div>
-                
-                <div class="row">
-                    <div class="col-lg-4">
-                        <label class="form-label">
-                            <input type="checkbox" class="ScoutPlanActive form-check-input" onchange="ToggleScoutPlanRow(this, ${NewScoutPlanRowID}); ValidateScoutPlanningTable();" checked>
-                            Active
-                        </label>
-                    </div>
-
-                    <div class="col-lg-4">
-                        <label class="form-label">
-                            <input type="checkbox" class="ScoutPlanPriorityBanner form-check-input">
-                            High Priority
-                        </label>
-                    </div>
-
-                    <div class="col-lg-4">
-                        <label class="form-label" style="display: none;">
-                            <input type="checkbox" class="ScoutPlanUseRainbowCrystals form-check-input"
-                                onchange="SkipTableElement(this, 'CardOwnedSkipGroup', ${NewScoutPlanRowID});"
-                            >
-                            Use Rainbow Uncap Crystals
-                        </label>
-                        <div id="CardOwnedSkipGroup${NewScoutPlanRowID}" style="display: none;">
-                            <label class="form-label">
-                                <input type="checkbox" class="ScoutPlanCardOwned1 form-check-input"> Card 1 Owned
-                            </label>
-                            <label class="form-label">
-                                <input type="checkbox" class="ScoutPlanCardOwned2 form-check-input"> Card 2 Owned
-                            </label>
-                        </div>
-                    </div>
-                </div>
+                <label class="form-label" style="width: 100%;">
+                    Name:
+                    <input type="text" class="TasksPlanItem form-control">
+                </label>
             </td>
             <td>
-                <button type="button" class="btn btn-danger" onclick="$('tr[data-scoutplan-rowid=${NewScoutPlanRowID}]').remove(); ValidateScoutPlanningTable(); CheckForUnsavedChanges();">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <input class="TasksPlanDueDate form-control" type="text" data-parsley-required="true" data-parsley-mmddyyyy>
+                    </div>
+                    <div class="col-lg-6">
+                        <input class="TasksPlanDueTime form-control" type="time" data-parsley-required="true">
+                    </div>
+                </div>
+                <span class='TasksPlanCountdown'></span>
+            </td>
+            <td>
+                <label class="form-label" style="width: 100%;">
+                    Notes:
+                    <textarea class="TasksPlanNotes TasksPlanField TableField form-control" rows="1"></textarea>
+                </label>
+            </td>
+            <td class="td-label">
+                <label class="td-label">
+                    <input type="checkbox" class="TasksPlanCompleted form-check-input" onchange="ToggleTasksPlanRow(this, ${NewTasksPlanRowID}); ValidateTasksPlanningTable();">
+                </label>
+            </td>
+            <td>
+                <button type="button" class="btn btn-danger" onclick="$('tr[data-tasks-plan-rowid=${NewTasksPlanRowID}]').remove(); ValidateTasksPlanningTable(); CheckForUnsavedChanges();">
                     <i class="bi bi-x-lg" style="font-weight: bold;"></i>
                 </button>
             </td>
         </tr>`
     );
 
-    $('#ScoutPlanningTableBody').append(NewRow);
-    $('#ScoutPlanningTableBody').sortable("refresh");
+    $(`#TasksTableBody${value}`).append(NewRow);
+    $(`#TasksTableBody${value}`).sortable("refresh");
 
-    $(`tr[data-scoutplan-rowid=${NewScoutPlanRowID}] .ScoutPlanGoalsCell`).sortable();
-    $(`tr[data-scoutplan-rowid=${NewScoutPlanRowID}] input, tr[data-scoutplan-rowid=${NewScoutPlanRowID}] select`).addClass('ScoutPlanField TableField');
+    $(`tr[data-tasks-plan-rowid=${NewTasksPlanRowID}] .TasksPlanGoalsCell`).sortable();
+    $(`tr[data-tasks-plan-rowid=${NewTasksPlanRowID}] input, tr[data-tasks-plan-rowid=${NewTasksPlanRowID}] select`).addClass('TasksPlanField TableField');
 
+    $(`tr[data-tasks-plan-rowid=${NewTasksPlanRowID}]`).find(".TasksPlanDueDate").mask("00/00/0000", {placeholder: 'mm/dd/yyyy' }).datepicker({
+        changeMonth: true,
+        changeYear: true,
+    }).on('change', function() {
+        $(this).trigger('input');
+        $(this).parsley().validate(); // For some reason parsley text won't show up without this.
+    });
+
+    SetDueDateCountDown(NewTasksPlanRowID);
     SetParsleyValidations();
     UpdateUnsavedChangesListener();
-    NewScoutPlanRowID++;
+    NewTasksPlanRowID++;
 };
 
-function SortScoutPlanningTable() {
+function SetDueDateCountDown(RowID) {
+    let Row = $(`tr[data-tasks-plan-rowid="${RowID}"]`);
+
+    let TimerInterval = setInterval(function() {
+        let DueDate = Row.find('.TasksPlanDueDate').val();
+        let DueTime = Row.find('.TasksPlanDueTime').val();
+       
+        let CountDownDateTime = moment(`${DueDate} ${DueTime}`);
+
+        // console.log(CountDownDateTime)
+
+        if (!CountDownDateTime.isValid()) {
+            Row.find('.TasksPlanCountdown').html('');
+        }
+        else {
+            let Now = new Date().getTime();
+            let TimeDiff = (CountDownDateTime - Now)/1000;            
+            AbsTimeDiff = Math.abs(TimeDiff)
+            
+            let days = Math.floor(AbsTimeDiff / (60 * 60 * 24));
+            let hours = Math.floor((AbsTimeDiff % (60 * 60 * 24)) / (60 * 60));
+            let minutes = Math.floor((AbsTimeDiff % (60 * 60)) / (60));
+            let seconds = Math.floor(AbsTimeDiff % 60);
+
+            if (TimeDiff >= 0) {
+                Row.find('.TasksPlanCountdown').html(`(Due in: ${days}d ${hours}h ${minutes}m ${seconds}s)`);
+            } // TODO: Make this more programatic.
+            else if (Row.attr('data-tasks-plan-type') == TasksTableTypes.Daily.value) {
+                Row.find('.TasksPlanCompleted').prop('checked', false).change();
+                Row.find('.TasksPlanCountdown').html('');
+
+                while(moment(DueDate) <= Now) {
+                    DueDate = moment(DueDate).add(1, 'days').format('MM/DD/YYYY')
+                };
+                Row.find('.TasksPlanDueDate').val(DueDate);
+            }
+            else if (Row.attr('data-tasks-plan-type') == TasksTableTypes.Weekly.value) {
+                Row.find('.TasksPlanCompleted').prop('checked', false).change();
+                Row.find('.TasksPlanCountdown').html('');
+                while(moment(DueDate) <= Now) {
+                    DueDate = moment(DueDate).add(7, 'days').format('MM/DD/YYYY')
+                };
+                Row.find('.TasksPlanDueDate').val(DueDate);
+            }
+            else if (Row.attr('data-tasks-plan-type') == TasksTableTypes.Monthly.value) {
+                Row.find('.TasksPlanCompleted').prop('checked', false).change();
+                Row.find('.TasksPlanCountdown').html('');
+               
+                while(moment(DueDate) <= Now) {
+                    DueDate = moment(DueDate).add(1, 'months').format('MM/DD/YYYY')
+                };
+                Row.find('.TasksPlanDueDate').val(DueDate);
+            }
+            else {
+                Row.find('.TasksPlanCountdown').html(`(Over due by: ${days}d ${hours}h ${minutes}m ${seconds}s)`);
+            };
+        };
+    }, 1000);
+};
+
+function SortTasksPlanningTable() {
     let TableRowSortingArray = [];
 
-    $('tr[data-scoutplan-rowid]').each(function() {
-        let BannerID = $(this).find('.ScoutPlanBanner').attr('data-banner-id');
+    $('tr[data-tasks-plan-rowid]').each(function() {
+        let BannerID = $(this).find('.TasksPlanBanner').attr('data-banner-id');
 
         if (BannerID == 0) { // We don't need additional info for empty rows and trying to get it from BannersInfo will cause a crash.
-            TableRowSortingArray.push({RowID: $(this).attr('data-scoutplan-rowid')});
+            TableRowSortingArray.push({RowID: $(this).attr('data-tasks-plan-rowid')});
         }
         else {
             TableRowSortingArray.push({
-              RowID: $(this).attr('data-scoutplan-rowid'),
-              Priority: $(this).find('.ScoutPlanPriorityBanner').is(':checked'),
+              RowID: $(this).attr('data-tasks-plan-rowid'),
+              Priority: $(this).find('.TasksPlanPriorityBanner').is(':checked'),
               BannerType: BannersInfo[BannerID].Type,
               StartDate: BannersInfo[BannerID].StartDate
             });
@@ -240,19 +291,10 @@ function SortScoutPlanningTable() {
     });
 
     for (let i = 0; i < TableRowSortingArray.length; i++) {
-        $(`tr[data-scoutplan-rowid="${TableRowSortingArray[i].RowID}"]`).appendTo($("#ScoutPlanningTableBody"));
+        $(`tr[data-tasks-plan-rowid="${TableRowSortingArray[i].RowID}"]`).appendTo($(`TasksTableBody${value}`));
     };
 
     // TODO: Figure out how to trigger the sortable update event so we don't have to duplicate code.
-    ValidateScoutPlanningTable();
+    ValidateTasksPlanningTable();
     UnsavedChanges = true;
-};
-
-function SkipTableElement(Caller, SkipID, RowNumber) {
-    if ($(Caller).is(':checked')) {
-        $(`#${SkipID}${RowNumber}`).show();
-    }
-    else {
-        $(`#${SkipID}${RowNumber}`).hide();
-    };
 };

@@ -17,14 +17,14 @@
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js" integrity="sha384-DRe+1gYJauFEenXeWS8TmYdBmDUqnR5Rcw7ax4KTqOxXWd4NAMP2VPU5H69U7yP9" crossorigin="anonymous"></script>
         <script src="Scripts/TasksTables.js" type="text/javascript"></script>
-        <!-- <script type="text/javascript"></script> -->
+        <link href="assets/css/ScreenMessage.css" rel="stylesheet" type="text/css"/>
 
 
-        <script src="Scripts/TaskCalcs.mjs" type="text/javascript"></script>
+        <script src="Scripts/TasksCalcs.mjs" type="text/javascript"></script>
         <script src="Scripts/Fields.js" type="text/javascript"></script>
         <script src="Scripts/Parsley.js" type="text/javascript"></script>
         <script src="Scripts/Modal.js" type="text/javascript"></script>
-        <script src="Scripts/MonthlyUpdater.js" type="text/javascript"></script>
+        <script src="Scripts/ImportExport.js" type="text/javascript"></script>
 
         <script src="https://parsleyjs.org/dist/parsley.js" integrity="sha384-0HmdHQBHe/sSM1qEobdZMf43ZJs6BLvTd73EqZSM6VrXo2ICjuQ5aYrka2MbVt9U" crossorigin="anonymous"></script>
         <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js" integrity="sha384-RIQuldGV8mnjGdob13cay/K1AJa+LR7VKHqSXrrB5DPGryn4pMUXRLh92Ev8KlGF" crossorigin="anonymous"></script>
@@ -37,7 +37,7 @@
 
         <script type="text/javascript">
             let Page = 'index';
-            let NewScoutPlanRowID; // Initializing here so it can be used throughout the whole code and kept consistent.
+            let NewTasksPlanRowID; // Initializing here so it can be used throughout the whole code and kept consistent.
             let UpdateTableTimeout; // Prevents the import from triggering this function several times.
             let UpdateModalTimeout;
             let ImportInProgress = true;
@@ -129,7 +129,7 @@
                 background: #90D5FF;
             }
             
-            .InactiveScoutPlanRow {
+            .InactiveTasksPlanRow {
                 color: gray;
                 border-color: gray;
             }
@@ -223,6 +223,12 @@
             }
         </style>
 
+        <div id="OutOfDateMessage" class="banner-container" style="display: none;">
+            <div class="floating-banner" style="color: black;">
+                Due dates have passed for one or more items since this page was loaded. Please <a href="javascript:window.location.reload();" class="RefreshPage">click here</a> to refresh the tables.
+            </div>
+        </div>
+
         <div id='Header'></div>
 
         <form id="form" data-parsley-validate="true">
@@ -272,76 +278,9 @@
 
                     <div id="TasksAccordionSettings" class="btn-group-horizontal" style="/*max-width: 300px;*/ margin-bottom: 15px">
                         Open on page load:
-
-                        
-
-                        
                     </div>
 
                     <a id="CalculatorHeaderAnchor"></a>
-
-                    <div>
-                        <hr>
-                        <h2>
-                            Daily Carat Pack <a data-toggle="tooltip" title="This calculator will assume that the Daily Carat Pack will either be purchased continuously, from the next renewal date onward, or not at all."><i class="bi bi-question-circle"></i></a>
-                        </h2>
-                        <br>
-
-                        <div class="form-check form-check-inline">
-                            <input type="checkbox" id="HasDailyCaratPack" class="form-check-input">
-                            <label for="HasDailyCaratPack" class="form-label">Purchasing Daily Carat Pack</label>
-                        </div>
-                        <br>
-
-                        <div id="CaratPackRenewalDateSkipGroup" style="display: none;">
-                            <label for="NextCaratPackRenewalDate" class="form-label">Next Renewal Date</label><br>
-                            <input id="NextCaratPackRenewalDate" class="form-date" type="text" style="max-width: 200px;" data-parsley-required="true" data-parsley-mmddyyyy data-parsley-mintoday data-parsley-errors-container="#CaratPackRenewalDateSkipGroup">
-                        </div>
-
-                        <script type="text/javascript">
-                            $('#HasDailyCaratPack').change(function() {
-                                if ( $('#HasDailyCaratPack').is(':checked') ) {
-                                    $('#CaratPackRenewalDateSkipGroup').show();
-                                }
-                                else {
-                                    $('#CaratPackRenewalDateSkipGroup').hide();
-                                };
-                            });
-                        </script>
-                    </div>
-
-                    <hr>
-                    <h2>
-                        Custom Login Bonuses <a data-toggle="tooltip" title="The calculator is not preprogrammed for temporary login bonuses, so this section will allow you to add them in."><i class="bi bi-question-circle"></i></a>
-                    </h2>
-                    <br>
-
-                    <div style="overflow-x: auto;">
-                        <table id="BonusTable" class="table table-bordered table-striped" style="font-size: min(3vw, 16px); text-align: center; border: 1px;">
-                            <thead id="BonusTableHeader" style="display: none;">
-                                <tr>
-                                    <th style="width: 18%; min-width: 100px;"> Starts On              </th>
-                                    <th style="width: 18%; min-width: 120px;"> Reward Frequency       </th>
-                                    <th style="width: 18%; min-width: 100px;"> Reward Type            </th>
-                                    <th style="width: 18%; min-width: 100px;"> Rewards Per Login      </th>
-                                    <th style="width: 18%; min-width: 100px;"> Total Login Bonuses    </th>
-                                    <th style="width: 10%; min-width: 100px;"> <!-- Remove button --> </th>
-                                </tr>
-                            </thead>
-                            <tbody id="BonusTableBody">
-                                <!--- Rows will be added by the script below. --->
-                            </tbody>
-                            <tfoot>
-                                <tr>
-                                    <td colspan="7">
-                                        <button id="AddBonusRowButton" type="button" style="width: 100%" class="btn btn-add" onclick="AddBonusRow();">
-                                            <b><i class="bi bi-plus-lg" style="font-size: 30px; font-weight: bold; color: white;"></i></b>
-                                        </button>
-                                    </td>
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </div>
 
                     <script type="text/javascript">
                         function AddBonusRow() {
@@ -413,7 +352,7 @@
                             dangerMode: true
                         }).then((Sort) => {
                             if (Sort) {
-                                SortScoutPlanningTable()
+                                SortTasksPlanningTable()
                                 swal({icon: 'success', text: 'Rows sorted successfully.', timer: 2000});
                             };
                         });
@@ -491,42 +430,18 @@
                             }
                         };
 
-                        $(function() {
-                            NewScoutPlanRowID = 0;
-
-                            $('#ScoutPlanningTableBody').sortable({
-                                handle: ".handle",
-                                update: function() {
-                                    ValidateScoutPlanningTable();
-                                    UnsavedChanges = true;
-                                }
-                            });
-
-                            $("#AddRowButton").click(function() {
-                                if ( $('tr[data-scoutplan-rowid]').length >= 100 ) {
-                                    swal({icon: 'error', text: 'Row limit reached.'});
-
-                                    return;
-                                };
-
-                                AddScoutPlanRow();
-                            });
-                        });
-
-                        function ValidateScoutPlanningTable() {
+                        function ValidateTasksPlanningTable() {
                             clearTimeout(UpdateTableTimeout);
-
-                            // console.log('yo');
 
                             UpdateTableTimeout = setTimeout(function() {
                                 $('.TableValidation').hide();
 
                                 let Banners = [];
                                 let PreviousRowBannerID = -1;
-                                $('tr[data-scoutplan-rowid]').each(function() {
-                                    let BannerID = $(this).find('.ScoutPlanBanner').attr('data-banner-id');
+                                $('tr[data-tasks-plan-rowid]').each(function() {
+                                    let BannerID = $(this).find('.TasksPlanBanner').attr('data-banner-id');
 
-                                    if ($(this).find('.ScoutPlanActive').is(':checked')) {
+                                    if ($(this).find('.TasksPlanActive').is(':checked')) {
                                         if (BannerID != 0) {
                                             if (PreviousRowBannerID != -1 && BannersInfo[BannerID].StartDate < BannersInfo[PreviousRowBannerID].StartDate) {
                                                 $(this).find('.OutOfOrderMessage').show();
@@ -545,8 +460,8 @@
                                 });
 
                                 if (
-                                    $('tr[data-scoutplan-rowid]:not(.InactiveScoutPlanRow)').length > 0
-                                    && $('tr[data-scoutplan-rowid]').find('.TableValidation:visible').length == 0
+                                    $('tr[data-tasks-plan-rowid]:not(.InactiveTasksPlanRow)').length > 0
+                                    && $('tr[data-tasks-plan-rowid]').find('.TableValidation:visible').length == 0
                                 ) {
                                     $("#Calculate").removeClass('disabled');
                                 }
@@ -554,48 +469,48 @@
                                     $("#Calculate").addClass('disabled');
                                 };
 
-                                /* ValidateScoutPlanningTable will hide the loading message since updating the table after the import can take a non-negligible amount of time, during which we would want the loading message to still be present. */
-                                $('#ScoutPlanningLoadingMessage').hide();
+                                /* ValidateTasksPlanningTable will hide the loading message since updating the table after the import can take a non-negligible amount of time, during which we would want the loading message to still be present. */
+                                $('.TasksTableLoadingMessage').hide();
                             }, 10)
                         };
 
-                        function UpdateScoutPlanningTableSelection(BannerID, ItemID, CurrentModalCallingRowID) {
-                            let CallingRow = $(`tr[data-scoutplan-rowid="${CurrentModalCallingRowID}"]`);
+                        function UpdateTasksPlanningTableSelection(BannerID, ItemID, CurrentModalCallingRowID) {
+                            let CallingRow = $(`tr[data-tasks-plan-rowid="${CurrentModalCallingRowID}"]`);
                             let TargetRow = CallingRow;
 
-                            if ( $(`.ScoutPlanBanner[data-banner-id="${BannerID}"]`).length == 0 ) {
-                                if ( CallingRow.find('.ScoutPlanBanner').attr('data-banner-id') == 0 ) {
+                            if ( $(`.TasksPlanBanner[data-banner-id="${BannerID}"]`).length == 0 ) {
+                                if ( CallingRow.find('.TasksPlanBanner').attr('data-banner-id') == 0 ) {
                                     PreviousModalCallingRowID = -1; // If a row's banner id is updated, then clicking on it again should have the modal focus on that banner id.
                                 }
                                 else {
-                                    AddScoutPlanRow();
-                                    TargetRow = $(`tr[data-scoutplan-rowid=${NewScoutPlanRowID-1}]`)
+                                    AddTasksPlanRow();
+                                    TargetRow = $(`tr[data-tasks-plan-rowid=${NewTasksPlanRowID-1}]`)
                                 };
 
-                                TargetRow.find('.ScoutPlanBanner').attr('data-banner-id', BannerID).html(BannersInfo[BannerID].Name);
+                                TargetRow.find('.TasksPlanBanner').attr('data-banner-id', BannerID).html(BannersInfo[BannerID].Name);
 
                                 if (ItemsInfo[ItemID].Type == BannerTypes.Card.Value) {
-                                    TargetRow.find('.ScoutPlanUseRainbowCrystals').parent().show();
+                                    TargetRow.find('.TasksPlanUseRainbowCrystals').parent().show();
                                 };
                             }
-                            else if (TargetRow.find('.ScoutPlanBanner').attr('data-banner-id') != BannerID) {
-                                TargetRowID = $(`div[data-banner-id="${BannerID}"]`).parent().parent().attr('data-scoutplan-rowid')
-                                TargetRow = $(`tr[data-scoutplan-rowid=${TargetRowID}]`);
+                            else if (TargetRow.find('.TasksPlanBanner').attr('data-banner-id') != BannerID) {
+                                TargetRowID = $(`div[data-banner-id="${BannerID}"]`).parent().parent().attr('data-tasks-plan-rowid')
+                                TargetRow = $(`tr[data-tasks-plan-rowid=${TargetRowID}]`);
                             };
 
                             if (TargetRow.find(`label[data-item-id="${ItemID}"]`).length == 1) {
                                 TargetRow.find(`label[data-item-id="${ItemID}"]`).remove();
                             }
                             else {
-                                TargetRow.find('.ScoutPlanGoalsCell').append($(`
+                                TargetRow.find('.TasksPlanGoalsCell').append($(`
                                     <label class="form-label" data-item-id=${ItemID}>
                                         ${ItemsInfo[ItemID].Name}
-                                        <input type="number" class="ScoutPlanGoal ScoutPlanField TableField form-control" data-parsley-trigger="input" data-parsley-required="true" data-parsley-min="0" min="0" Value="1">
+                                        <input type="number" class="TasksPlanGoal TasksPlanField TableField form-control" data-parsley-trigger="input" data-parsley-required="true" data-parsley-min="0" min="0" Value="1">
                                     </label>
                                 `));
                             };
 
-                            ValidateScoutPlanningTable();
+                            ValidateTasksPlanningTable();
                             UnsavedChanges = true;
                         };
                     </script>
@@ -621,17 +536,19 @@
                 <table id="ScoutResultsTable" class="table table-bordered table-striped" style="width: 100%; font-size: min(3vw, 16px); text-align: center; border: 1px; display: none;">
                     <thead>
                         <tr>
-                            <th style="width: 30%">Banner</th>
-                            <th style="width: 15%">
-                                Max Scouts <a data-toggle="tooltip" title="An estimate of how many scouts you can make on the banner. This is assuming all prior items are acquired with as few scouts as possible."><i class="bi bi-question-circle" style="color: black;"></i></a>
+                            <th style="width: 30%; min-width: 80px;">
+                                Task
                             </th>
-                            <th style="width: 30%">Scout Item(s)</th>
-                            <th style="width: 10%">Copies</th>
-                            <th style="width: 15%">Chance of Success</th>
+                            <th style="width: 30%; min-width: 80px;">
+                                Next Deadline <a data-toggle="tooltip" title="This will update automatically for daily, weekly, and monthly tables."><i class="bi bi-question-circle" style="color: black;"></i></a>
+                            </th>
+                            <th style="width: 40%; min-width: 80px;">
+                                Notes
+                            </td>
                         </tr>
                     </thead>
-                    <tbody id="ScoutPlanningResultsBody"> <!--- Will be filled in by ScoutPlanningCalculator. ---> </tbody>
-                    <tfoot> <!--- Will be filled in by ScoutPlanningCalculator. ---> </tfoot>
+                    <tbody id="TasksPlanningResultsBody"> <!--- Will be filled in by TasksPlanningCalculator. ---> </tbody>
+                    <tfoot> <!--- Will be filled in by TasksPlanningCalculator. ---> </tfoot>
                 </table>
 
                 <hr>
@@ -673,7 +590,7 @@
 
                     setTimeout(function () {
                         let ScoutConfig = CompileForm();
-                        ScoutPlanningCalculator(ScoutConfig);
+                        TasksPlanningCalculator(ScoutConfig);
 
                         $("#Calculate").html('Recalculate');
 
@@ -686,21 +603,21 @@
                 };
             });
 
-            function ToggleScoutPlanRow(caller, ScoutPlanRowID) {
+            function ToggleTasksPlanRow(caller, TasksPlanRowID) {
                 if ($(caller).is(':checked')) {
-                    $(`tr[data-scoutplan-rowid=${ScoutPlanRowID}] button.ScoutPlanSelector`).show();
-                    $(`tr[data-scoutplan-rowid=${ScoutPlanRowID}] .ScoutPlanBanner`).css('color', 'black');
+                    $(`tr[data-tasks-plan-rowid=${TasksPlanRowID}] button.TasksPlanSelector`).show();
+                    $(`tr[data-tasks-plan-rowid=${TasksPlanRowID}] .TasksPlanBanner`).css('color', 'black');
                 }
                 else {
-                    $(`tr[data-scoutplan-rowid=${ScoutPlanRowID}] button.ScoutPlanSelector`).hide();
-                    $(`tr[data-scoutplan-rowid=${ScoutPlanRowID}] .ScoutPlanBanner`).css('color', 'gray');
+                    $(`tr[data-tasks-plan-rowid=${TasksPlanRowID}] button.TasksPlanSelector`).hide();
+                    $(`tr[data-tasks-plan-rowid=${TasksPlanRowID}] .TasksPlanBanner`).css('color', 'gray');
                 };
             };
 
             function CompileForm(){
                 let FormValues = {};
 
-                $('#form input:not(.ScoutPlanField, .BonusTableField, .SelectorField), #form select:not(.ScoutPlanField, .BonusTableField, .SelectorField)').each(function() {
+                $('#form input:not(.TasksPlanField), #form select:not(.TasksPlanField)').each(function() {
                     if ($(this).is(':checkbox')) {
                         FormValues[this.id] = $(this).is(':checked');
                     }
@@ -712,212 +629,23 @@
                     };
                 });
 
-                FormValues.ValidationErrors = getInvalidFields().length + $('tr[data-scoutplan-rowid]').find('.TableValidation:visible').length;
+                FormValues.ValidationErrors = getInvalidFields().length + $('tr[data-tasks-plan-rowid]').find('.TableValidation:visible').length;
 
-                FormValues.LoginBonusArray = [];
-                $('tr.BonusTableRow').each(function() {
-                    FormValues.LoginBonusArray.push({
-                        StartDate:           $(this).find('td .BonusStartDate').val(),
-                        Frequency:           $(this).find('td .BonusFrequency').val(),
-                        ItemType:     Number($(this).find('td .BonusItemType').val()),
-                        ItemQuantity:        $(this).find('td .BonusItemQuantity').val(),
-                        Logins:              $(this).find('td .BonusLogins').val()
+                FormValues.TasksPlanArray = [];
+                $('tr[data-tasks-plan-rowid]').each(function() {
+                    FormValues.TasksPlanArray.push({
+                        Item: $(this).find('td .TasksPlanItem').val(),
+                        DueDate: $(this).find('td .TasksPlanDueDate').val(),
+                        DueTime: $(this).find('td .TasksPlanDueTime').val(),
+                        Completed: $(this).find('td .TasksPlanCompleted').is(':checked'),
+                        Notes: $(this).find('td .TasksPlanNotes').val(),
+                        RowID: $(this).attr('data-tasks-plan-rowid'),
+                        TableType: $(this).attr('data-tasks-plan-type')
                     });
                 });
 
-                FormValues.ScoutPlanArray = [];
-                $('tr[data-scoutplan-rowid]').each(function() {
-                    let Items = [];
-                    let Goals = {};
-                    $(this).find('label[data-item-id]').each(function() {
-                        Items.push($(this).attr('data-item-id'));
-                        Goals[$(this).attr('data-item-id')] = $(this).find('.ScoutPlanGoal').val();
-                    });
-
-                    if (Items.length > 0) {
-                        FormValues.ScoutPlanArray.push({
-                            Items: Items,
-                            Goals: Goals,
-                            ExchangePoints: Number($(this).find('td .ScoutPlanExchangePoints').val()),
-                            Active: $(this).find('td .ScoutPlanActive').is(':checked'),
-                            PriorityBanner: $(this).find('td .ScoutPlanPriorityBanner').is(':checked'),
-                            UseRainbowCrystals: $(this).find('td .ScoutPlanUseRainbowCrystals').is(':checked'),
-                            CardOwned1: $(this).find('td .ScoutPlanCardOwned1').is(':checked'),
-                            CardOwned2: $(this).find('td .ScoutPlanCardOwned2').is(':checked'),
-                            Limit: $(this).find('td .ScoutPlanLimit').val(),
-                            FreePulls: $(this).find('td .ScoutPlanFreePulls').val()
-                        });
-                    };
-                });
 
                 return FormValues
-            };
-
-            function Import(RunCalcs, ImportState, Scroll) {
-                ImportInProgress = true;
-                let ValidImport = true;
-                let JSONImport;
-
-                try {
-                    JSONImport = JSON.parse(ImportState);
-
-                    // Since some of the import code explicitly references the scout plan array it needs to be defined.
-                    if (JSONImport.ScoutPlanArray == undefined) {
-                        ValidImport = false;
-                    };
-                } catch (error) {
-                    ValidImport = false;
-                };
-
-                if (!ValidImport) {
-                    $('#InvalidImportMessage').show();
-                    ImportInProgress = false;
-                }
-                else if (RunCalcs && JSONImport.ValidationErrors > 0) {
-                    swal({icon: 'error', text: 'Validation issues were detected in the import. The import will proceed, but calculations will not be performed.'}).then(function() {
-                        Import(RunCalcs=false, ImportState=ImportState, Scroll=true);
-                    });
-                }
-                else {
-                    $('#InvalidImportMessage').hide();
-                    $('#LoadingImportMessage').show();
-                    $('#ScoutPlanningLoadingMessage').show();
-
-                    $('tr.BonusTableRow').remove();
-                    for (let i = 0; i < JSONImport.LoginBonusArray.length; i++) {
-                        AddBonusRow();
-
-                        for (let Key in JSONImport.LoginBonusArray[i]) {
-                            if ($(`.BonusTableRow .Bonus${Key}`)[i] != undefined) {
-                                $(`.BonusTableRow .Bonus${Key}`)[i].value = JSONImport.LoginBonusArray[i][Key];
-                            };
-                        };
-                    };
-
-                    setTimeout(function() {
-                        $('#form input:not(.ScoutPlanField, .BonusTableField), #form select:not(.ScoutPlanField, .BonusTableField)').each(function() {
-                            if ($(this).is(':checkbox')) {
-                                $(this).prop('checked', JSONImport[this.id]);
-                            }
-                            else {
-                                // The renewal date field used to use a different date format so this will account for that when loading older imports.
-                                if ($(this).hasClass('form-date') && !moment(JSONImport[this.id], "MM/DD/YYYY").isValid() && moment(JSONImport[this.id]).isValid()) {
-                                    JSONImport[this.id] = moment(JSONImport[this.id]).format('L');
-                                };
-
-                                $(this).val(JSONImport[this.id]);
-                            };
-                        });
-
-                        // We will remove the existing scout planning rows to avoid any potential conflicts with the imported ones.
-                        $('tr[data-scoutplan-rowid]').remove();
-                        NewScoutPlanRowID = 0; // We will set this to zero so that each row's id will line up with the scout plan item's index.
-
-                        let ExpiredActiveItems = [];
-                        for (let i = 0; i < JSONImport.ScoutPlanArray.length; i++) {
-                            let ScoutPlanBanner = JSONImport.ScoutPlanArray[i];
-                            let FirstItem = ScoutPlanBanner.Items[0];
-
-                            // TODO: Review if this is really necessary.
-                            if (FirstItem <= 0 || FirstItem >= ItemsInfo.length) {
-                                NewScoutPlanRowID++; // We want to keep this synced with i.
-                            }
-                            else if (ItemsInfo[FirstItem].GlobalEndDate < Today) {
-                                NewScoutPlanRowID++;
-
-                                if (ScoutPlanBanner.Active) {
-                                    for (let j = 0; j < ScoutPlanBanner.Items.length; j++) {
-                                        ExpiredActiveItems.push(ScoutPlanBanner.Items[j]) ;
-                                    };
-                                };
-                            }
-                            else {
-                                AddScoutPlanRow();
-
-                                let BannerID = ItemsInfo[FirstItem].BannerID;
-                                let TargetRow = $(`tr[data-scoutplan-rowid=${NewScoutPlanRowID-1}]`);
-                                TargetRow.find('.ScoutPlanBanner').attr('data-banner-id', BannerID);
-                                TargetRow.find('.ScoutPlanBanner').html( BannersInfo[ BannerID ].Name );
-
-                                if (BannersInfo[BannerID].Type == BannerTypes.Card.Value) {
-                                    TargetRow.find('.ScoutPlanUseRainbowCrystals').parent().show();
-                                };
-
-                                // TODO: Really need to write some of this dynamically.
-                                $(`tr[data-scoutplan-rowid=${i}] td .ScoutPlanExchangePoints`).val(ScoutPlanBanner.ExchangePoints);
-                                $(`tr[data-scoutplan-rowid=${i}] td .ScoutPlanLimit`).val(ScoutPlanBanner.Limit);
-                                $(`tr[data-scoutplan-rowid=${i}] td .ScoutPlanFreePulls`).val(ScoutPlanBanner.FreePulls);
-                                $(`tr[data-scoutplan-rowid=${i}] td .ScoutPlanActive`).prop('checked', ScoutPlanBanner.Active);
-                                $(`tr[data-scoutplan-rowid=${i}] td .ScoutPlanPriorityBanner`).prop('checked', ScoutPlanBanner.PriorityBanner);
-                                $(`tr[data-scoutplan-rowid=${i}] td .ScoutPlanUseRainbowCrystals`).prop('checked', ScoutPlanBanner.UseRainbowCrystals);
-                                $(`tr[data-scoutplan-rowid=${i}] td .ScoutPlanCardOwned1`).prop('checked', ScoutPlanBanner.CardOwned1);
-                                $(`tr[data-scoutplan-rowid=${i}] td .ScoutPlanCardOwned2`).prop('checked', ScoutPlanBanner.CardOwned2);
-
-                                let GoalsCell = $(`tr[data-scoutplan-rowid=${i}]`).find('.ScoutPlanGoalsCell');
-                                for (let j = 0; j < ScoutPlanBanner.Items.length; j++) {
-                                    let ItemID = ScoutPlanBanner.Items[j];
-
-                                    GoalsCell.append($(`
-                                        <label class="form-label" data-item-id=${ItemID}>
-                                            ${ItemsInfo[ItemID].Name}
-                                            <input type="number" class="ScoutPlanGoal ScoutPlanField TableField form-control" data-parsley-trigger="input" data-parsley-required="true" data-parsley-min="0" min="0" Value="${ScoutPlanBanner.Goals[ItemID]}">
-                                        </label>
-                                    `));
-                                };
-                            };
-                        };
-
-                        if (JSONImport.ScoutPlanArray.length == 0) {
-                            $('#ScoutPlanningLoadingMessage').hide();
-                        };
-
-                        if (ExpiredActiveItems.length > 0) {
-                            let RemovedRows = `Expired wish plan row(s) were detected in the import. The following row(s) have been automatically removed:
-                            `
-                            for (let i = 0; i < ExpiredActiveItems.length; i++) {
-                                RemovedRows += `
-                                    \u2022 ${ItemsInfo[ExpiredActiveItems[i]].Name}`
-                            };
-                            RemovedRows += `
-
-                            All other information has been successfully imported.`
-
-                            swal({icon: 'info', text: RemovedRows});
-                        };
-
-                        // TODO: This really needs to be removed.
-                        $('input:not(.ui-datepicker-month, .ui-datepicker-year), select:not(.ui-datepicker-month, .ui-datepicker-year)').change().trigger('input');
-
-                        if (RunCalcs == true) {
-                            $('#Calculate').trigger('click');
-                        }
-                        else if (Scroll == true) {
-                            /* We will prevent ValidateScoutPlanningTable from running till the scroll is complete.
-                            As otherwise it would delay the scrolling animation. */
-                            // TODO: The above comment will need to be revisted as this was made prior to the select2 dropdowns being replaced with modal selection.
-                            clearTimeout(UpdateTableTimeout);
-
-                            $('html, body').animate({
-                                scrollTop: $("#CalculatorHeaderAnchor").offset().top,
-                                easing: 'linear'
-                            }, 500, function() {ValidateScoutPlanningTable()});
-                        };
-
-                        $('#LoadingImportMessage').hide();
-                        ImportInProgress = false;
-                    }, 100);
-                };
-            };
-
-            function Export() {
-                let ExportState = JSON.stringify(CompileForm());
-                var temp = $("<input>");
-                $("body").append(temp);
-                temp.val(ExportState).select();
-                document.execCommand("copy");
-                temp.remove();
-
-                swal({icon: 'success', text: 'Export copied to clipboard.', timer: 2000});
             };
 
             $(function () {
@@ -944,7 +672,7 @@
             };
 
             function UpdateUnsavedChangesListener() {
-                $("input, select").on('input', function() {
+                $("input, select, textarea").on('input', function() {
                     CheckForUnsavedChanges();
                 });
             };
@@ -974,6 +702,8 @@
                 has been refreshed. This is needed to reconstruct the scout planning table. We are calling this variable TaskTrackerSessionState
                 instead of just SessionState as that var name is used by the Genshin calculator and we don't want any storage conflicts. */
                 $(document).on('visibilitychange', function() {
+                    // console.log('7o');
+
                     if (UnsavedChanges) {
                         localStorage.setItem("TaskTrackerSessionState", JSON.stringify(CompileForm()));
                     };
@@ -981,11 +711,14 @@
 
                 let TaskTrackerSessionState = localStorage.getItem("TaskTrackerSessionState");
 
-                // console.log(TaskTrackerSessionState !== null);
                 if (TaskTrackerSessionState != null) {
 
                     // TODO: Add a toggle to turn this off.
                     Import(RunCalcs=false, ImportState=TaskTrackerSessionState, Scroll=false);
+                    $('.TasksTableLoadingMessage').hide();
+                    setTimeout(function() {
+                        $("#Calculate").click();
+                    }, 1000);
                 }
                 else {
                     ImportInProgress = false;
@@ -999,6 +732,7 @@
                     };
                 };
             });
+
         </script>
     </body>
 </html>

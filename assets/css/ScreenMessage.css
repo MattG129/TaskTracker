@@ -1,0 +1,33 @@
+/* Container wraps the banner to allow clicking items behind it */
+.banner-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 9999;
+    pointer-events: none; /* Clicks pass straight through this container */
+    display: flex;
+    justify-content: center;
+    padding: 15px;
+    box-sizing: border-box;
+}
+
+/* The actual visible message bar */
+.floating-banner {
+    background-color:   #fae073;
+    color: white;
+    font-family: sans-serif;
+    font-weight: bold;
+    padding: 12px 24px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    pointer-events: auto; /* Restores clicking inside the banner itself */
+    
+    /* Entry animation */
+    animation: slideDown 0.4s ease-out;
+}
+
+@keyframes slideDown {
+    from { transform: translateY(-50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
