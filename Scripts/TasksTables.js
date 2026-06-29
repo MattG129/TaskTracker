@@ -37,7 +37,10 @@ $(function() {
         let label = TasksTableTypes[key].label;
 
         let Open = false;
-        if (Object.hasOwn(JSONImport, `AccLoadOpen${value}`)) {
+        if (JSONImport == null) {
+            Open = true;
+        }
+        else if (Object.hasOwn(JSONImport, `AccLoadOpen${value}`)) {
             Open = JSONImport[`AccLoadOpen${value}`];
         };
 
