@@ -214,7 +214,7 @@ function SetDueDateCountDown(RowID) {
                 Row.find('.TasksPlanCompleted').prop('checked', false).change();
                 Row.find('.TasksPlanCountdown').html('');
 
-                while(moment(DueDate) <= Now) {
+                while(moment(`${DueDate} ${DueTime}`) <= Now) {
                     DueDate = moment(DueDate).add(1, 'days').format('MM/DD/YYYY')
                 };
                 Row.find('.TasksPlanDueDate').val(DueDate);
@@ -222,7 +222,7 @@ function SetDueDateCountDown(RowID) {
             else if (Row.attr('data-tasks-plan-type') == TasksTableTypes.Weekly.value) {
                 Row.find('.TasksPlanCompleted').prop('checked', false).change();
                 Row.find('.TasksPlanCountdown').html('');
-                while(moment(DueDate) <= Now) {
+                while(moment(`${DueDate} ${DueTime}`) <= Now) {
                     DueDate = moment(DueDate).add(7, 'days').format('MM/DD/YYYY')
                 };
                 Row.find('.TasksPlanDueDate').val(DueDate);
@@ -231,7 +231,7 @@ function SetDueDateCountDown(RowID) {
                 Row.find('.TasksPlanCompleted').prop('checked', false).change();
                 Row.find('.TasksPlanCountdown').html('');
                
-                while(moment(DueDate) <= Now) {
+                while(moment(`${DueDate} ${DueTime}`) <= Now) {
                     DueDate = moment(DueDate).add(1, 'months').format('MM/DD/YYYY')
                 };
                 Row.find('.TasksPlanDueDate').val(DueDate);
