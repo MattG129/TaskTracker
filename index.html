@@ -39,7 +39,6 @@
             let Page = 'index';
             let NewTasksPlanRowID; // Initializing here so it can be used throughout the whole code and kept consistent.
             let UpdateTableTimeout; // Prevents the import from triggering this function several times.
-            let UpdateModalTimeout;
             let ImportInProgress = true;
             let UnsavedChanges = false;
             // Will be used to tell the modal if the selector is being opened up from the same row it was last opened for or not.
@@ -368,7 +367,6 @@
                                     <i id="FullScreenButton" type="button" class="bi bi-arrows-fullscreen" onclick="
                                         $('#SelectionModalDialog').toggleClass('modal-fullscreen');
                                         $('#FullScreenButton').toggleClass('bi-arrows-fullscreen bi-fullscreen-exit');
-                                        UpdateModalSelection();
                                     "></i>
 
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -684,12 +682,6 @@
             };
 
             $(function() {
-                // For some reason this is the only way I've been able to get the select2 to automatically resize on window resizing.
-                let ResizeTimeout;
-                $(window).on('resize', function() {
-                    UpdateModalSelection();
-                });
-
                 SetParsleyValidations();
 
                 $('input, select').change().trigger('input');
