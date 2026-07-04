@@ -60,7 +60,6 @@ function Import(RunCalcs, ImportState, Scroll) {
             $('tr[data-tasks-plan-rowid]').remove();
             NewTasksPlanRowID = 0; // We will set this to zero so that each row's id will line up with the scout plan item's index.
 
-            let ExpiredActiveItems = [];
             for (let i = 0; i < JSONImport.TasksPlanArray.length; i++) {
                 let TasksPlanRow = JSONImport.TasksPlanArray[i];
 
@@ -77,6 +76,8 @@ function Import(RunCalcs, ImportState, Scroll) {
             if (JSONImport.TasksPlanArray.length == 0) {
                 $('#TasksPlanningLoadingMessage').hide();
             };
+
+            SetParsleyValidations(Validate=true);
 
             if (RunCalcs == true) {
                 $('#Calculate').trigger('click');

@@ -172,7 +172,7 @@ function AddTasksPlanRow(TableID) {
     });
 
     SetDueDateCountDown(NewTasksPlanRowID);
-    SetParsleyValidations();
+    SetParsleyValidations(Validate=false);
     UpdateUnsavedChangesListener();
     NewTasksPlanRowID++;
 };

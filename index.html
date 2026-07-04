@@ -348,7 +348,8 @@
 
                     <hr><h2>Tasks Planning</h2><br>
 
-                    <button type="button" class="btn btn-primary" style="border-width: 1px; border-color: black;" onclick="
+                    <!-- TODO: Gotta see if I'll keep this and if so then I gotta fix it up. -->
+                    <button type="button" class="btn btn-primary" style="border-width: 1px; border-color: black; display: none;" onclick="
                         swal({
                             title: 'Are you sure?',
                             text: 'Are you sure you want to automatically sort all table rows? Rows will be sorted first by start date, then by priority, and finally by banner type.',
@@ -663,7 +664,7 @@
                 });
             });
 
-            function SetParsleyValidations() {
+            function SetParsleyValidations(Validate) {
                 $('input:not([type="checkbox"])').on('input', function(){
                     if (!$(this).parsley().isValid()) {
                         $(this).css('background-color', '#E55451');
@@ -673,9 +674,11 @@
                     };
                 });
 
-                $('input:not([type="checkbox"])').each(function() {
-                    $(this).parsley().validate();
-                });
+                if (Validate) {                
+                    $('input:not([type="checkbox"])').each(function() {
+                        $(this).parsley().validate();
+                    });
+                };
             };
 
             function UpdateUnsavedChangesListener() {
@@ -691,10 +694,6 @@
             };
 
             $(function() {
-                SetParsleyValidations();
-
-                $('input, select').change().trigger('input');
-
                 /* This is called in the add row function and since that will probably 
                 always be run this probably isn't needed but better safe than sorry. */
                 UpdateUnsavedChangesListener();
@@ -703,8 +702,6 @@
                 has been refreshed. This is needed to reconstruct the scout planning table. We are calling this variable TaskTrackerSessionState
                 instead of just SessionState as that var name is used by the Genshin calculator and we don't want any storage conflicts. */
                 $(document).on('visibilitychange', function() {
-                    // console.log('7o');
-
                     if (UnsavedChanges) {
                         localStorage.setItem("TaskTrackerSessionState", JSON.stringify(CompileForm()));
                     };
