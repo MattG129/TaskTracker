@@ -54,7 +54,7 @@ $(function() {
                             <h4 class="d-block w-100 text-center">${label} Tasks</h4>
                         </button>
                     </h2>
-                    <div id="TasksTableAccordionContent${value}" class="accordion-collapse ${Open ? '' : 'collapse'}" aria-labelledby="TasksTableAccordion${value}" data-bs-parent="#TasksTableAccordion${value}">
+                    <div id="TasksTableAccordionContent${value}" class="accordion-collapse ${Open ? 'show' : 'collapse'}" aria-labelledby="TasksTableAccordion${value}" data-bs-parent="#TasksTableAccordion${value}">
                         <div class="accordion-body" style="overflow-x: auto; padding: 5px;">
                             <table id="TasksTable${value}" class="TasksTable table table-bordered table-striped" style="font-size: min(3vw, 16px); text-align: center; border: 1px;">
                                 <thead>
