@@ -133,10 +133,10 @@ function AddTasksPlanRow(TableID) {
             <td>
                 <div class="row">
                     <div class="col-lg-6">
-                        <input class="TasksPlanDueDate form-control" type="text" data-parsley-required="true" data-parsley-mmddyyyy>
+                        <input class="TasksPlanDueDate form-control" type="text" data-parsley-required="${value != TasksTableTypes.OneTime.value}" data-parsley-mmddyyyy>
                     </div>
                     <div class="col-lg-6">
-                        <input class="TasksPlanDueTime form-control" type="time" data-parsley-required="true">
+                        <input class="TasksPlanDueTime form-control" type="time">
                     </div>
                 </div>
                 <span class='TasksPlanCountdown'></span>
