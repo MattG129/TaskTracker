@@ -59,6 +59,8 @@ function TasksPlanningCalculator(ScoutConfig) {
 function RenderScoutResults(ScoutConfig) {
     $('#ScoutResultsTable .ScoutPlanResultsRow').remove();
 
+    $('#TasksPlanningResultsBody').append($('<tr class="ScoutPlanResultsRow TotalWithDeadline"></tr>'));    
+
     let Tomorrow = moment(new Date().getTime()).add(1, 'days');
     let NextWeek = moment(new Date().getTime()).add(7, 'days');
     let NextMonth = moment(new Date().getTime()).add(1, 'months');
@@ -120,6 +122,9 @@ function RenderScoutResults(ScoutConfig) {
     let DueTomorrowCumulative = DueIn.Overdue + DueIn.Tomorrow;
     let DueThisWeekCumulative = DueIn.Overdue + DueIn.Tomorrow + DueIn.ThisWeek;
     let DueThisMonthCumulative = DueIn.Overdue + DueIn.Tomorrow + DueIn.ThisWeek + DueIn.ThisMonth;
+    
+    $('tr.TotalWithDeadline').html(`<td colspan=4><b>Total tasks with deadlines: ${DueThisMonthCumulative + DueIn.MoreThanMonth}</b></td>`);
+    
     $('tr.NoDueDateSectionHeader').html(`<td colspan=4><b>Tasks with no due date: ${DueIn.NoDueDate}</b></td>`);
     $('tr.OverdueSectionHeader').html(`<td colspan=4><b>Overdue tasks: ${DueIn.Tomorrow}</b></td>`);
     $('tr.TomorrowSectionHeader').html(`<td colspan=4><b>Tasks due in a day: ${DueIn.Tomorrow}${DueTomorrowCumulative > DueIn.Tomorrow ? ` (${DueTomorrowCumulative})`:''}</b></td>`);
