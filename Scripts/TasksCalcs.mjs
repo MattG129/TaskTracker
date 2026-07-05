@@ -37,6 +37,9 @@ function TasksPlanningCalculator(ScoutConfig) {
     // console.log(ScoutConfig.TasksPlanArray);
 
     ScoutConfig.TasksPlanArray.sort((a, b) => {
+        if (a.DueDate == '' && b.DueDate != '') {return 1};
+        if (a.DueDate != '' && b.DueDate == '') {return -1};
+
         let dateCompare = a.DueDate.localeCompare(b.DueDate);
 
         if (dateCompare !== 0) {
@@ -56,24 +59,52 @@ function TasksPlanningCalculator(ScoutConfig) {
 function RenderScoutResults(ScoutConfig) {
     $('#ScoutResultsTable .ScoutPlanResultsRow').remove();
 
+    let Tomorrow = moment(new Date().getTime()).add(1, 'days');
+    let NextWeek = moment(new Date().getTime()).add(7, 'days');
+    let NextMonth = moment(new Date().getTime()).add(1, 'months');
+    
+    let DueIn = {NoDueDate: 0, Tomorrow: 0, ThisWeek: 0, ThisMonth: 0, MoreThanMonth: 0}
+    
     for (let i = 0; i < ScoutConfig.TasksPlanArray.length; i++) {
         let BannerPlan = ScoutConfig.TasksPlanArray[i];
-        let Row = $(`tr[data-tasks-plan-rowid="${BannerPlan.RowID}"]`)
+        let CorrespondingRow = $(`tr[data-tasks-plan-rowid="${BannerPlan.RowID}"]`)
 
-        // console.log(moment(`${BannerPlan.DueDate} ${BannerPlan.DueTime}`).format('MM/DD/YYYY hh:mm:ss A'))
-        
         if (!$('#HideCompletedFromReport').prop('checked') || !BannerPlan.Completed) {
+            let Deadline = moment(`${BannerPlan.DueDate} ${BannerPlan.DueTime}`);
+
+            // TOOD: See if this, and related code, can be made more programmatic.
+            if (BannerPlan.DueDate == '') {
+                if (DueIn.NoDueDate == 0) {$('#TasksPlanningResultsBody').append($('<tr class="ScoutPlanResultsRow NoDueDateSectionHeader"></tr>'))};
+                DueIn.NoDueDate++;
+            }
+            else if (Deadline < Tomorrow) {
+                if (DueIn.Tomorrow == 0) {$('#TasksPlanningResultsBody').append($('<tr class="ScoutPlanResultsRow TomorrowSectionHeader"></tr>'))};
+                DueIn.Tomorrow++;
+            }
+            else if (Deadline < NextWeek) {
+                if (DueIn.ThisWeek == 0) {$('#TasksPlanningResultsBody').append($('<tr class="ScoutPlanResultsRow ThisWeekSectionHeader"></tr>'))};
+                DueIn.ThisWeek++;
+            }
+            else if (Deadline < NextMonth) {
+                if (DueIn.ThisMonth == 0) {$('#TasksPlanningResultsBody').append($('<tr class="ScoutPlanResultsRow ThisMonthSectionHeader"></tr>'))};
+                DueIn.ThisMonth++;
+            }
+            else {
+                if (DueIn.MoreThanMonth == 0) {$('#TasksPlanningResultsBody').append($('<tr class="ScoutPlanResultsRow MoreThanMonthSectionHeader"></tr>'))};
+                DueIn.MoreThanMonth++;
+            };
+
             let NewRow = `
                 <tr class="ScoutPlanResultsRow">
                     <td>${BannerPlan.Item}</td>
-                    <td>
-                        ${moment(`${BannerPlan.DueDate} ${BannerPlan.DueTime}`).format('MM/DD/YYYY hh:mm A')}
+                    <td data-tasks-plan-rowid=${BannerPlan.RowID}>
+                        ${moment(`${BannerPlan.DueDate} ${BannerPlan.DueTime}`)}
                         <br>
-                        ${Row.find('.TasksPlanCountdown').html()}
+                        ${CorrespondingRow.find('.TasksPlanCountdown').html()}
                     </td>
                     <td class="td-label">
                         <label class="td-label">
-                            <input type="checkbox" class="TableField form-check-input" onclick="
+                            <input type="checkbox" class="TableField form-check-input" ${BannerPlan.Completed ? 'checked':''} onclick="
                                 $('tr[data-tasks-plan-rowid=${BannerPlan.RowID}]').find('.TasksPlanCompleted').prop('checked', $(this).prop('checked')).change();
                                 CheckForUnsavedChanges();
                             ">
@@ -83,9 +114,23 @@ function RenderScoutResults(ScoutConfig) {
                 </tr>
             `
             $('#TasksPlanningResultsBody').append($(NewRow));
-        }
-
+        };
     };
+
+    let DueThisWeekCumulative = DueIn.Tomorrow + DueIn.ThisWeek;
+    let DueThisMonthCumulative = DueIn.Tomorrow + DueIn.ThisWeek + DueIn.ThisMonth;
+    $('tr.NoDueDateSectionHeader').html(`<td colspan=4><b>Tasks with no due date: ${DueIn.NoDueDate}</b></td>`)
+    $('tr.TomorrowSectionHeader').html(`<td colspan=4><b>Tasks due in a day: ${DueIn.Tomorrow}</b></td>`)
+    $('tr.ThisWeekSectionHeader').html(`<td colspan=4><b>Tasks due in a week: ${DueIn.ThisWeek}${DueThisWeekCumulative > DueIn.ThisWeek ? ` (${DueThisWeekCumulative})`:''}</b></td>`)
+    $('tr.ThisMonthSectionHeader').html(`<td colspan=4><b>Tasks due in a month: ${DueIn.ThisMonth}${DueThisMonthCumulative > DueIn.ThisMonth ? ` (${DueThisMonthCumulative})`:''}</b></td>`)
+    $('tr.MoreThanMonthSectionHeader').html(`<td colspan=4><b>Tasks due in more than a month: ${DueIn.MoreThanMonth}</b></td>`)
+    $('#TasksPlanningResultsBody').append(`
+        <tr class="ScoutPlanResultsRow">
+            <td colspan=4>
+                <b>Total: ${DueIn.NoDueDate + DueIn.Tomorrow + DueIn.ThisWeek + DueIn.ThisMonth + DueIn.MoreThanMonth}</b>
+            </td>
+        </tr>
+    `);
 
     $('#ScoutResultsTable').show();
 };

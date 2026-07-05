@@ -193,7 +193,7 @@ function SetDueDateCountDown(RowID) {
         }
         else {
             let Now = new Date().getTime();
-            let TimeDiff = (CountDownDateTime - Now)/1000;            
+            let TimeDiff = (CountDownDateTime - Now)/1000;
             AbsTimeDiff = Math.abs(TimeDiff)
             
             let days = Math.floor(AbsTimeDiff / (60 * 60 * 24));
@@ -233,7 +233,12 @@ function SetDueDateCountDown(RowID) {
             else {
                 Row.find('.TasksPlanCountdown').html(`(Over due by: ${days}d ${hours}h ${minutes}m ${seconds}s)`);
             };
+
         };
+
+        // Update the timer in the corresponding result row to match the table's row.
+        // console.log($('.ScoutPlanResultsRow').find(`td[data-tasks-plan-rowid=${RowID}]`))
+        $('.ScoutPlanResultsRow').find(`td[data-tasks-plan-rowid=${RowID}]`).html(Row.find('.TasksPlanCountdown').html())
     }, 1000);
 };
 
