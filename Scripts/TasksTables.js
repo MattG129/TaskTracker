@@ -238,7 +238,10 @@ function SetDueDateCountDown(RowID) {
 
         // Update the timer in the corresponding result row to match the table's row.
         // console.log($('.ScoutPlanResultsRow').find(`td[data-tasks-plan-rowid=${RowID}]`))
-        $('.ScoutPlanResultsRow').find(`td[data-tasks-plan-rowid=${RowID}]`).html(Row.find('.TasksPlanCountdown').html())
+        $('.ScoutPlanResultsRow').find(`td[data-tasks-plan-rowid=${RowID}]`).html(
+            `${DueDate != '' ? moment(`${DueDate} ${DueTime}`).format('MM/DD/YYYY hh:mm A') + '<br>' : ''}`
+            + Row.find('.TasksPlanCountdown').html()
+        )
     }, 1000);
 };
 

@@ -63,7 +63,7 @@ function RenderScoutResults(ScoutConfig) {
     let NextWeek = moment(new Date().getTime()).add(7, 'days');
     let NextMonth = moment(new Date().getTime()).add(1, 'months');
     
-    let DueIn = {NoDueDate: 0, Tomorrow: 0, ThisWeek: 0, ThisMonth: 0, MoreThanMonth: 0}
+    let DueIn = {NoDueDate: 0, Overdue: 0, Tomorrow: 0, ThisWeek: 0, ThisMonth: 0, MoreThanMonth: 0}
     
     for (let i = 0; i < ScoutConfig.TasksPlanArray.length; i++) {
         let BannerPlan = ScoutConfig.TasksPlanArray[i];
@@ -76,6 +76,10 @@ function RenderScoutResults(ScoutConfig) {
             if (BannerPlan.DueDate == '') {
                 if (DueIn.NoDueDate == 0) {$('#TasksPlanningResultsBody').append($('<tr class="ScoutPlanResultsRow NoDueDateSectionHeader"></tr>'))};
                 DueIn.NoDueDate++;
+            }
+            else if (Deadline < new Date().getTime()) {
+                if (DueIn.Overdue == 0) {$('#TasksPlanningResultsBody').append($('<tr class="ScoutPlanResultsRow OverdueSectionHeader"></tr>'))};
+                DueIn.Overdue++;
             }
             else if (Deadline < Tomorrow) {
                 if (DueIn.Tomorrow == 0) {$('#TasksPlanningResultsBody').append($('<tr class="ScoutPlanResultsRow TomorrowSectionHeader"></tr>'))};
@@ -97,11 +101,7 @@ function RenderScoutResults(ScoutConfig) {
             let NewRow = `
                 <tr class="ScoutPlanResultsRow">
                     <td>${BannerPlan.Item}</td>
-                    <td data-tasks-plan-rowid=${BannerPlan.RowID}>
-                        ${moment(`${BannerPlan.DueDate} ${BannerPlan.DueTime}`)}
-                        <br>
-                        ${CorrespondingRow.find('.TasksPlanCountdown').html()}
-                    </td>
+                    <td data-tasks-plan-rowid=${BannerPlan.RowID}></td>
                     <td class="td-label">
                         <label class="td-label">
                             <input type="checkbox" class="TableField form-check-input" ${BannerPlan.Completed ? 'checked':''} onclick="
@@ -117,13 +117,15 @@ function RenderScoutResults(ScoutConfig) {
         };
     };
 
-    let DueThisWeekCumulative = DueIn.Tomorrow + DueIn.ThisWeek;
-    let DueThisMonthCumulative = DueIn.Tomorrow + DueIn.ThisWeek + DueIn.ThisMonth;
-    $('tr.NoDueDateSectionHeader').html(`<td colspan=4><b>Tasks with no due date: ${DueIn.NoDueDate}</b></td>`)
-    $('tr.TomorrowSectionHeader').html(`<td colspan=4><b>Tasks due in a day: ${DueIn.Tomorrow}</b></td>`)
-    $('tr.ThisWeekSectionHeader').html(`<td colspan=4><b>Tasks due in a week: ${DueIn.ThisWeek}${DueThisWeekCumulative > DueIn.ThisWeek ? ` (${DueThisWeekCumulative})`:''}</b></td>`)
-    $('tr.ThisMonthSectionHeader').html(`<td colspan=4><b>Tasks due in a month: ${DueIn.ThisMonth}${DueThisMonthCumulative > DueIn.ThisMonth ? ` (${DueThisMonthCumulative})`:''}</b></td>`)
-    $('tr.MoreThanMonthSectionHeader').html(`<td colspan=4><b>Tasks due in more than a month: ${DueIn.MoreThanMonth}</b></td>`)
+    let DueTomorrowCumulative = DueIn.Overdue + DueIn.Tomorrow;
+    let DueThisWeekCumulative = DueIn.Overdue + DueIn.Tomorrow + DueIn.ThisWeek;
+    let DueThisMonthCumulative = DueIn.Overdue + DueIn.Tomorrow + DueIn.ThisWeek + DueIn.ThisMonth;
+    $('tr.NoDueDateSectionHeader').html(`<td colspan=4><b>Tasks with no due date: ${DueIn.NoDueDate}</b></td>`);
+    $('tr.OverdueSectionHeader').html(`<td colspan=4><b>Overdue tasks: ${DueIn.Tomorrow}</b></td>`);
+    $('tr.TomorrowSectionHeader').html(`<td colspan=4><b>Tasks due in a day: ${DueIn.Tomorrow}${DueTomorrowCumulative > DueIn.Tomorrow ? ` (${DueTomorrowCumulative})`:''}</b></td>`);
+    $('tr.ThisWeekSectionHeader').html(`<td colspan=4><b>Tasks due in a week: ${DueIn.ThisWeek}${DueThisWeekCumulative > DueIn.ThisWeek ? ` (${DueThisWeekCumulative})`:''}</b></td>`);
+    $('tr.ThisMonthSectionHeader').html(`<td colspan=4><b>Tasks due in a month: ${DueIn.ThisMonth}${DueThisMonthCumulative > DueIn.ThisMonth ? ` (${DueThisMonthCumulative})`:''}</b></td>`);
+    $('tr.MoreThanMonthSectionHeader').html(`<td colspan=4><b>Tasks due in more than a month: ${DueIn.MoreThanMonth}</b></td>`);
     $('#TasksPlanningResultsBody').append(`
         <tr class="ScoutPlanResultsRow">
             <td colspan=4>
