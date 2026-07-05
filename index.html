@@ -91,9 +91,14 @@
                 font-size: min(3vw, 16px);
             }
 
-            /* td-label is used by table cells and labels when we want an entire table cell to act as a label for a checkbox it contains. */
+         
+            table {
+                height: 100%;
+            }
+
             td.td-label {
-                position: relative;
+                padding: 0;
+                height: 100%;
             }
 
             td.td-label:hover {
@@ -101,11 +106,11 @@
             }
 
             label.td-label {
-                position: absolute;
-                top: 0%;
-                left: 0;
+                display: block; 
                 width: 100%;
-                height: 100%;
+                height: 100%; 
+                box-sizing: border-box;                
+                cursor: pointer;
             }
 
             .swal-button {
