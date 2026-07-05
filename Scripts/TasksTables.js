@@ -202,7 +202,7 @@ function SetDueDateCountDown(RowID) {
             let seconds = Math.floor(AbsTimeDiff % 60);
 
             if (TimeDiff >= 0) {
-                Row.find('.TasksPlanCountdown').html(`(Due in: ${days}d ${hours}h ${minutes}m ${seconds}s)`);
+                Row.find('.TasksPlanCountdown').html(`Due in: ${days}d ${hours}h ${minutes}m${$('#ShowSeconds').prop('checked') ? ` ${seconds}s` : ''}`);
             } // TODO: Make this more programatic.
             else if (Row.attr('data-tasks-plan-type') == TasksTableTypes.Daily.value) {
                 Row.find('.TasksPlanCompleted').prop('checked', false).change();
@@ -231,7 +231,7 @@ function SetDueDateCountDown(RowID) {
                 Row.find('.TasksPlanDueDate').val(DueDate);
             }
             else {
-                Row.find('.TasksPlanCountdown').html(`(Over due by: ${days}d ${hours}h ${minutes}m ${seconds}s)`);
+                Row.find('.TasksPlanCountdown').html(`Over due by: ${days}d ${hours}h ${minutes}m${$('#ShowSeconds').prop('checked') ? ` ${seconds}s` : ''}`);
             };
 
         };
