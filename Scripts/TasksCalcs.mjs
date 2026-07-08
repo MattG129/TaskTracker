@@ -126,7 +126,7 @@ function RenderScoutResults(ScoutConfig) {
     $('tr.TotalWithDeadline').html(`<td colspan=4><b>Total tasks with deadlines: ${DueThisMonthCumulative + DueIn.MoreThanMonth}</b></td>`);
     
     $('tr.NoDueDateSectionHeader').html(`<td colspan=4><b>Tasks with no due date: ${DueIn.NoDueDate}</b></td>`);
-    $('tr.OverdueSectionHeader').html(`<td colspan=4><b>Overdue tasks: ${DueIn.Tomorrow}</b></td>`);
+    $('tr.OverdueSectionHeader').html(`<td colspan=4><b>Overdue tasks: ${DueIn.Overdue}</b></td>`);
     $('tr.TomorrowSectionHeader').html(`<td colspan=4><b>Tasks due in a day: ${DueIn.Tomorrow}${DueTomorrowCumulative > DueIn.Tomorrow ? ` (${DueTomorrowCumulative})`:''}</b></td>`);
     $('tr.ThisWeekSectionHeader').html(`<td colspan=4><b>Tasks due in a week: ${DueIn.ThisWeek}${DueThisWeekCumulative > DueIn.ThisWeek ? ` (${DueThisWeekCumulative})`:''}</b></td>`);
     $('tr.ThisMonthSectionHeader').html(`<td colspan=4><b>Tasks due in a month: ${DueIn.ThisMonth}${DueThisMonthCumulative > DueIn.ThisMonth ? ` (${DueThisMonthCumulative})`:''}</b></td>`);
@@ -134,7 +134,7 @@ function RenderScoutResults(ScoutConfig) {
     $('#TasksPlanningResultsBody').append(`
         <tr class="ScoutPlanResultsRow">
             <td colspan=4>
-                <b>Total: ${DueIn.NoDueDate + DueIn.Tomorrow + DueIn.ThisWeek + DueIn.ThisMonth + DueIn.MoreThanMonth}</b>
+                <b>Total: ${DueIn.NoDueDate + DueIn.Overdue + DueIn.Tomorrow + DueIn.ThisWeek + DueIn.ThisMonth + DueIn.MoreThanMonth}</b>
             </td>
         </tr>
     `);
