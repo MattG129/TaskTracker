@@ -34,21 +34,12 @@ function DayOfWeek(Date) {
 };
 
 function TasksPlanningCalculator(ScoutConfig) {
-    // console.log(ScoutConfig.TasksPlanArray);
-
     ScoutConfig.TasksPlanArray.sort((a, b) => {
         if (a.DueDate == '' && b.DueDate != '') {return 1};
         if (a.DueDate != '' && b.DueDate == '') {return -1};
 
-        let dateCompare = a.DueDate.localeCompare(b.DueDate);
-
-        if (dateCompare !== 0) {
-            return dateCompare;
-        }
-
-        return a.DueTime.localeCompare(b.DueTime);
+        return moment(`${a.DueDate} ${a.DueTime}`) > moment(`${b.DueDate} ${b.DueTime}`)
     });
-    // console.log(ScoutConfig.TasksPlanArray);
 
     ScoutConfig.ActiveScoutItems = 0;
     ScoutConfig.ActiveScoutPlanArray = [];
