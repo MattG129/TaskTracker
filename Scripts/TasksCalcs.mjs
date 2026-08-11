@@ -38,7 +38,20 @@ function TasksPlanningCalculator(ScoutConfig) {
         if (a.DueDate == '' && b.DueDate != '') {return 1};
         if (a.DueDate != '' && b.DueDate == '') {return -1};
 
-        return moment(`${a.DueDate} ${a.DueTime}`) > moment(`${b.DueDate} ${b.DueTime}`)
+        let TimeDiff = moment(`${a.DueDate} ${a.DueTime}`) - moment(`${b.DueDate} ${b.DueTime}`);
+
+        if (TimeDiff > 0) {
+            return 1;
+        }
+        else if (TimeDiff < 0) {
+            return -1;
+        }
+        else if (a.RowID < b.RowID) {
+            return -1;
+        }
+        else {
+            return 1;
+        }
     });
 
     ScoutConfig.ActiveScoutItems = 0;
