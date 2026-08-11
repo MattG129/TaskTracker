@@ -46,12 +46,9 @@ function TasksPlanningCalculator(ScoutConfig) {
         else if (TimeDiff < 0) {
             return -1;
         }
-        else if (a.RowID < b.RowID) {
-            return -1;
-        }
         else {
-            return 1;
-        }
+            return a.RowID - b.RowID;
+        };        
     });
 
     ScoutConfig.ActiveScoutItems = 0;
