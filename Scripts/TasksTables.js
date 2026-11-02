@@ -68,13 +68,9 @@ $(function() {
                                         <th style="width: 30%; min-width: 80px;">
                                             Next Deadline <a data-toggle="tooltip" title="This will update automatically for daily, weekly, and monthly tables."><i class="bi bi-question-circle" style="color: black;"></i></a>
                                         </th>
-                                        <th style="width: 20%; min-width: 80px;">
+                                        <th style="width: 0%; min-width: 80px; display: none;">
                                             Notes
                                         </td>
-                                        <th style="width: 10%; min-width: 80px;">
-                                            Completed
-                                        </th>
-
                                         <th style="width: 10%;">
                                             <!-- Remove Button -->
                                         </th>
@@ -141,16 +137,39 @@ function AddTasksPlanRow(TableID) {
                 </div>
                 <span class='TasksPlanCountdown'></span>
             </td>
-            <td>
+            <td style="display: none;">
                 <textarea class="TasksPlanNotes TasksPlanField TableField form-control" rows="1" style="width: 100%;"></textarea>
             </td>
-            <td class="td-label">
-                <label class="td-label">
-                    <input type="checkbox" class="TasksPlanCompleted form-check-input" onchange="ToggleTasksPlanRow(this, ${NewTasksPlanRowID}); ValidateTasksPlanningTable();">
-                </label>
-            </td>
-            <td>
-                <button type="button" class="btn btn-danger" onclick="$('tr[data-tasks-plan-rowid=${NewTasksPlanRowID}]').remove(); ValidateTasksPlanningTable(); CheckForUnsavedChanges();">
+            <td class="flex-wrap: wrap;">
+               <button type="button" class="btn btn-primary" style="margin-bottom: 5px;" onclick="
+                    OpenTasksPlanningTableModal(${NewTasksPlanRowID});
+                    ValidateTasksPlanningTable();
+                    CheckForUnsavedChanges();
+                ">
+                    <i class="bi bi-pencil-square" style="font-weight: bold;"></i>
+                </button>
+                
+                <input type="checkbox" class="TasksPlanCompleted form-check-input" style="width: 35px; height: 35px; margin-bottom: 5px;" onchange="
+                    ToggleTasksPlanRow(this, ${NewTasksPlanRowID});
+                    ValidateTasksPlanningTable();
+                ">
+                
+                <button type="button" class="btn btn-danger" style="margin-bottom: 5px;" onclick="
+                    swal({
+                        title: 'Are you sure?',
+                        text: 'Are you sure you want to delete this task? This action cannot be undone.',
+                        icon: 'warning',
+                        buttons: true,
+                        dangerMode: true
+                    }).then((Delete) => {
+                        if (Delete) {
+                            $('tr[data-tasks-plan-rowid=${NewTasksPlanRowID}]').remove();
+                            ValidateTasksPlanningTable();
+                            CheckForUnsavedChanges();
+                            swal({icon: 'success', text: 'Task deleted successfully.', timer: 2000});
+                        };
+                    });
+                ">
                     <i class="bi bi-x-lg" style="font-weight: bold;"></i>
                 </button>
             </td>
@@ -241,7 +260,13 @@ function SetDueDateCountDown(RowID) {
         $('.ScoutPlanResultsRow').find(`td[data-tasks-plan-rowid=${RowID}]`).html(
             `${DueDate != '' ? moment(`${DueDate} ${DueTime}`).format('MM/DD/YYYY hh:mm A') + '<br>' : ''}`
             + Row.find('.TasksPlanCountdown').html()
-        )
+        );
+
+        if (RowID == CurrentModalRow) {
+            $('#ModalCountDown').html(
+                Row.find('.TasksPlanCountdown').html()
+            );
+        };
     }, 1000);
 };
 

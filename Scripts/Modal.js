@@ -87,3 +87,23 @@
 //         $('#ModalSelectionResults').html(Table);
 //     }, 200);
 // };
+
+
+function OpenTasksPlanningTableModal(RowID) {
+    CurrentModalRow = RowID;
+
+    let Row = $(`tr[data-tasks-plan-rowid="${RowID}"]`);
+
+    $('#SelectionModal').modal('show');
+
+    $('#SelectionModal #ModalItem').val($(Row).find('.TasksPlanItem').val());
+    $('#SelectionModal #ModalDueDate').val($(Row).find('.TasksPlanDueDate').val());
+    $('#SelectionModal #ModalDueTime').val($(Row).find('.TasksPlanDueTime').val());
+    $('#SelectionModal #ModalNotes').val($(Row).find('.TasksPlanNotes').val());
+
+    $('#ModalDueDate').parsley().reset();
+};
+
+function UpdateTableFromModal(Field, NewVal) {
+    $(`tr[data-tasks-plan-rowid="${CurrentModalRow}"]`).find(`.${Field}`).val(NewVal).change();
+};

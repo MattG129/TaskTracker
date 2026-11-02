@@ -105,15 +105,20 @@ function RenderScoutResults(ScoutConfig) {
                 <tr class="ScoutPlanResultsRow">
                     <td>${BannerPlan.Item}</td>
                     <td data-tasks-plan-rowid=${BannerPlan.RowID}></td>
-                    <td class="td-label">
-                        <label class="td-label">
-                            <input type="checkbox" class="TableField form-check-input" ${BannerPlan.Completed ? 'checked':''} onclick="
-                                $('tr[data-tasks-plan-rowid=${BannerPlan.RowID}]').find('.TasksPlanCompleted').prop('checked', $(this).prop('checked')).change();
-                                CheckForUnsavedChanges();
-                            ">
-                        </label>
+                    <td><pre style="font-family: inherit;">${BannerPlan.Notes.substring(0, 25)} ${BannerPlan.Notes.length > 25 ? '...' : ''}</pre></td>
+                    <td>
+                        <button type="button" class="btn btn-primary" style="margin-bottom: 5px;" onclick="
+                            OpenTasksPlanningTableModal(${BannerPlan.RowID});    
+                            ValidateTasksPlanningTable();
+                            CheckForUnsavedChanges();                           
+                        ">
+                            <i class="bi bi-pencil-square" style="font-weight: bold;"></i>
+                        </button>
+                        <input type="checkbox" class="TableField form-check-input" ${BannerPlan.Completed ? 'checked':''} style="width: 35px; height: 35px; margin-bottom: 5px;" onclick="
+                            $('tr[data-tasks-plan-rowid=${BannerPlan.RowID}]').find('.TasksPlanCompleted').prop('checked', $(this).prop('checked')).change();
+                            CheckForUnsavedChanges();
+                        ">
                     </td>
-                    <td>${BannerPlan.Notes}</td>
                 </tr>
             `
             $('#TasksPlanningResultsBody').append($(NewRow));

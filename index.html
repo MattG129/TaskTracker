@@ -41,9 +41,7 @@
             let UpdateTableTimeout; // Prevents the import from triggering this function several times.
             let ImportInProgress = true;
             let UnsavedChanges = false;
-            // Will be used to tell the modal if the selector is being opened up from the same row it was last opened for or not.
-            let PreviousModalCallingRowID = -1;
-            let CurrentModalCallingRowID = -1;
+            let CurrentModalRow = 0;
         </script>
     </head>
     <body>
@@ -91,7 +89,6 @@
                 font-size: min(3vw, 16px);
             }
 
-         
             table {
                 height: 100%;
             }
@@ -206,6 +203,10 @@
 
             #FullScreenButton:hover {
                 color: gray;
+            }
+
+            .ModalField {
+                border-color: black;
             }
 
             .ModalCellActive {
@@ -392,35 +393,39 @@
                                 <div class="modal-body">
                                     <div class="row">
                                         <div class="col-lg-4">
-                                            <label for="ItemNameFilter" class="form-label">Name</label>
-                                            <input id="ItemNameFilter" class="form-control SelectorField" type="text" style="max-width: 300px;">
+                                            <label for="ModalItem" class="form-label">Task</label>
+                                            <input id="ModalItem" class="ModalField form-control" type="text" style="max-width: 300px; margin-bottom: 5px;" onchange="UpdateTableFromModal('TasksPlanItem', $(this).val());">
+                                        </div>
+                                        <div class="col-lg-4">
+                                            <label for="ModalDueDate" class="form-label">Due Date</label>
+                                            <input id="ModalDueDate" class="ModalField form-control" type="text" data-parsley-required="${value != TasksTableTypes.OneTime.value}" data-parsley-mmddyyyy style="max-width: 300px; margin-bottom: 5px;" onchange="UpdateTableFromModal('TasksPlanDueDate', $(this).val());">
+
+                                            <!-- TODO: Datepicker isn't lining up with field. -->
+                                            <script type='text/javascript'>
+                                                $('#ModalDueDate').mask("00/00/0000", {placeholder: 'mm/dd/yyyy' }).datepicker({
+                                                    changeMonth: true,
+                                                    changeYear: true,
+                                                }).on('change', function() {
+                                                    $(this).trigger('input');
+                                                    $(this).parsley().validate(); // For some reason parsley text won't show up without this.
+                                                });
+                                            </script>
                                         </div>
 
                                         <div class="col-lg-4">
-                                            <label for="BannerTypeFilter" class="form-label">Banner Type</label>
-                                            <select id="BannerTypeFilter" class="form-select SelectorField" style="max-width: 300px;">
-                                                <option value="0" selected>Any</option>
-                                                <option value="1">Trainee</option>
-                                                <option value="2">Support Card</option>
-                                            </select>
-                                        </div>
-
-                                        <div class="col-lg-4">
-                                            <label for="BannerIDFilter" class="form-label">Banner</label>
-                                            <button type="button" class=" btn btn-danger" onclick="$('#BannerIDFilter').val(0).trigger('input')"
-                                                style="color: white; font-size: 13px; padding-top: 2px; padding-left: 5px; padding-right: 5px; padding-bottom: 2px;"
-                                            >
-                                                <i class="bi bi-x-lg"></i>
-                                            </button>
-                                            <select id="BannerIDFilter" class="form-select SelectorField" style="max-width: 300px;">
-                                                <option value="0" selected>Any</option>
-                                                <!-- Other options will be filled in via Modal.js -->
-                                            </select>
+                                            <label for="ModalDueTime" class="form-label">Due Time</label>
+                                            <input id="ModalDueTime" class="ModalField form-control" type="time" style="max-width: 300px; margin-bottom: 5px;" onchange="UpdateTableFromModal('TasksPlanDueTime', $(this).val());">
                                         </div>
                                     </div>
 
-                                    <hr>
-                                    <div id="ModalSelectionResults"></div>
+                                    <br>
+                                    <div id="ModalCountDown"></div>
+                                    <br>
+                                    
+                                    <center>
+                                        <label for="ModalNotes" class="form-label">Notes</label>
+                                        <textarea id="ModalNotes" class="ModalField form-control" rows=3 style="width: 90%;" onchange="UpdateTableFromModal('TasksPlanNotes', $(this).val());"></textarea>
+                                    </center>
                                 </div>
                             </div>
                         </div>
@@ -490,45 +495,7 @@
                             }, 10)
                         };
 
-                        function UpdateTasksPlanningTableSelection(BannerID, ItemID, CurrentModalCallingRowID) {
-                            let CallingRow = $(`tr[data-tasks-plan-rowid="${CurrentModalCallingRowID}"]`);
-                            let TargetRow = CallingRow;
 
-                            if ( $(`.TasksPlanBanner[data-banner-id="${BannerID}"]`).length == 0 ) {
-                                if ( CallingRow.find('.TasksPlanBanner').attr('data-banner-id') == 0 ) {
-                                    PreviousModalCallingRowID = -1; // If a row's banner id is updated, then clicking on it again should have the modal focus on that banner id.
-                                }
-                                else {
-                                    AddTasksPlanRow();
-                                    TargetRow = $(`tr[data-tasks-plan-rowid=${NewTasksPlanRowID-1}]`)
-                                };
-
-                                TargetRow.find('.TasksPlanBanner').attr('data-banner-id', BannerID).html(BannersInfo[BannerID].Name);
-
-                                if (ItemsInfo[ItemID].Type == BannerTypes.Card.Value) {
-                                    TargetRow.find('.TasksPlanUseRainbowCrystals').parent().show();
-                                };
-                            }
-                            else if (TargetRow.find('.TasksPlanBanner').attr('data-banner-id') != BannerID) {
-                                TargetRowID = $(`div[data-banner-id="${BannerID}"]`).parent().parent().attr('data-tasks-plan-rowid')
-                                TargetRow = $(`tr[data-tasks-plan-rowid=${TargetRowID}]`);
-                            };
-
-                            if (TargetRow.find(`label[data-item-id="${ItemID}"]`).length == 1) {
-                                TargetRow.find(`label[data-item-id="${ItemID}"]`).remove();
-                            }
-                            else {
-                                TargetRow.find('.TasksPlanGoalsCell').append($(`
-                                    <label class="form-label" data-item-id=${ItemID}>
-                                        ${ItemsInfo[ItemID].Name}
-                                        <input type="number" class="TasksPlanGoal TasksPlanField TableField form-control" data-parsley-trigger="input" data-parsley-required="true" data-parsley-min="0" min="0" Value="1">
-                                    </label>
-                                `));
-                            };
-
-                            ValidateTasksPlanningTable();
-                            UnsavedChanges = true;
-                        };
                     </script>
 
                     <hr><h2>Tasks Report</h2><br>
@@ -552,17 +519,16 @@
                 <table id="ScoutResultsTable" class="table table-bordered table-striped" style="width: 100%; font-size: min(3vw, 16px); text-align: center; border: 1px; display: none;">
                     <thead>
                         <tr>
-                            <th style="width: 30%; min-width: 80px;">
+                            <th style="width: 25%; min-width: 80px;">
                                 Task
                             </th>
-                            <th style="width: 30%; min-width: 80px;">
+                            <th style="width: 25%; min-width: 80px;">
                                 Next Deadline <a data-toggle="tooltip" title="This will update automatically for daily, weekly, and monthly tables."><i class="bi bi-question-circle" style="color: black;"></i></a>
                             </th>
-                            <th style="width: 10%; min-width: 80px;">
-                                Completed
-                            </th>
-                            <th style="width: 30%; min-width: 80px;">
+                            <th style="width: 35%; min-width: 80px;">
                                 Notes
+                            </td>
+                            <th style="width: 15%; min-width: 80px;">
                             </td>
                         </tr>
                     </thead>
