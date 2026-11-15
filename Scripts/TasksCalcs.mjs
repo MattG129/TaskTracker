@@ -114,7 +114,7 @@ function RenderScoutResults(ScoutConfig) {
                         ">
                             <i class="bi bi-pencil-square" style="font-weight: bold;"></i>
                         </button>
-                        <input type="checkbox" class="TableField form-check-input" ${BannerPlan.Completed ? 'checked':''} style="width: 35px; height: 35px; margin-bottom: 5px;" onclick="
+                        <input type="checkbox" class="ReportCheckBox TableField form-check-input" ${BannerPlan.Completed ? 'checked':''} style="width: 35px; height: 35px; margin-bottom: 5px;" onclick="
                             $('tr[data-tasks-plan-rowid=${BannerPlan.RowID}]').find('.TasksPlanCompleted').prop('checked', $(this).prop('checked')).change();
                             CheckForUnsavedChanges();
                         ">
